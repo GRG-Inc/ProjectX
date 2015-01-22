@@ -1,7 +1,5 @@
 package client;
 
-import java.util.HashMap;
-
 public class Scacchiera {
 	
 	//0= casella non valida, 1=casella vuota, 2=pedina bianca, 3=pedina nera
@@ -9,8 +7,8 @@ public class Scacchiera {
 	private int nereCatturate=0, biancheCatturate=0;//nereCatturate e' il numero di pedine perse da side1
 //	private HashMap<Integer, Integer> distance = new HashMap<Integer, Integer>();
 //	private byte[] direzioni = {1,2,3,4,5,6};//N,NO,O,S,SE,E
-//	private final static int[] minColumn = { 1, 1, 1, 1, 1, 1, 2, 3, 4, 5}; //da che colonna inizia la scacchiera per ogni riga compresa cornice
-//	private final static int[] maxColumn = { 5, 5, 6, 7, 8, 9, 9, 9, 9, 9}; //a che colonna finisce la scacchiera per ogni riga compresa cornice
+	private final static int[] minColumn = { 1, 1, 1, 1, 1, 1, 2, 3, 4, 5}; //da che colonna inizia la scacchiera per ogni riga compresa cornice
+	private final static int[] maxColumn = { 5, 5, 6, 7, 8, 9, 9, 9, 9, 9}; //a che colonna finisce la scacchiera per ogni riga compresa cornice
 	private final byte bianco=2, nero=3;
 //	private Integer dist;
 	
@@ -46,10 +44,16 @@ public class Scacchiera {
 	}
 	
 	public byte[][] getScacchiera(){
-		return this.scacchiera;
+		return scacchiera;
 	}
 	
-	
+	//FIXME ===============> da testare
+	public boolean esisteCella(int riga, int colonna){
+		if(riga >= 1 && riga <= 9 && colonna >= minColumn[riga] && colonna<= maxColumn[riga])
+			return true;
+		return false;
+	}
+
 	
 	
 	public void aggiornaScacchiera(int origP1, int origP2, int origU1, int origU2, int destP1, int destP2, int destU1, int destU2){
@@ -187,6 +191,7 @@ public class Scacchiera {
 					}
 				}
 	}
+
 	
 	private void traslaDiagonale (int numeroPedine, int i, int n1, int j, int n2){
 		byte side = getSide(i, n1);
@@ -320,4 +325,16 @@ public class Scacchiera {
 	private byte getSide(int i, int numericValue) {
 		return (scacchiera[i][numericValue] == 2)? bianco: nero;
 	}
+	
+	public void stampa(byte[][] s){
+		String x = " ABCDEFGHI ";
+		System.out.println("    1 2 3 4 5 6 7 8 9  ");
+		for(int i=0; i<s.length; i++){
+			System.out.print(x.charAt(i)+ " ");
+			for(int j=0; j<s.length; j++)
+				System.out.print((s[i][j]) + " ");
+		System.out.println();
+		}
+	}
+
 }

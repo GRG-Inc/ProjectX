@@ -18,23 +18,23 @@ public class Client {
 	private final static int[] minColumn = { 1, 1, 1, 1, 1, 1, 2, 3, 4, 5}; //da che colonna inizia la scacchiera per ogni riga compresa cornice
 	private final static int[] maxColumn = { 5, 5, 6, 7, 8, 9, 9, 9, 9, 9}; //a che colonna finisce la scacchiera per ogni riga compresa cornice
 	private byte[] direzioni = {1,2,3,4,5,6};//N,NO,O,S,SE,E
-	private HashMap<Integer, Integer> distance = new HashMap<Integer, Integer>();
-	private Integer dist;
+	private static HashMap<Integer, Integer> distance = new HashMap<Integer, Integer>();
+	private static Integer dist;
 	static final byte bianco=2, nero=3;
 	
 	
 //	private Thread attesaMessaggi;
 //	private Thread operazioni;
 
-	private Scacchiera scacchiera; 
+	public static Scacchiera scacchiera; 
 	
 	public Client(String serverAddress, int port) throws Exception {
 		
 		scacchiera = new Scacchiera();
 		// Setup networking
-		socket = new Socket(serverAddress, port);
-		in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-		out = new PrintWriter(socket.getOutputStream(), true);
+//		socket = new Socket(serverAddress, port);
+//		in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+//		out = new PrintWriter(socket.getOutputStream(), true);
 	}
 
 	public void play() throws Exception {
@@ -137,14 +137,13 @@ public class Client {
 			byte[][] scacFutura= scacFuturaClass.getScacchiera();
 			for(int i=1; i<10; i++){
 				for(int j = minColumn[i]; j<=maxColumn[i]; j++){
-					if(scacc[i][j]==s1){
-						//scacFutura = scacc.clone();
-						for(int k=0; k<direzioni.length; k++){
+					if(scacc[i][j] == s1){
+						for(int k = 0; k < direzioni.length; k++){
 							if(direzioni[k]==1){
-//								//NORD
-//								if(){
-//									
-//								}
+								//NORD
+								if(scacchiera.esisteCella(i-1, j)){
+									System.out.println();
+								}
 							}else if(direzioni[k]==2){
 								//NORD-OVEST
 							}else if(direzioni[k]==3){
@@ -165,7 +164,7 @@ public class Client {
 		}
 	}
 	
-	public void distanza(){
+	public static void distanza(){
 		int [][] scacc = new int [11][11];
 		for(int i=0; i<scacc.length; i++){
 			for(int j=0; j<scacc[0].length; j++){
@@ -182,7 +181,7 @@ public class Client {
 		}
 	}
 	
-	private int calcolaDistanza(int i, int j, int k, int l){
+	private static int calcolaDistanza(int i, int j, int k, int l){
 		int col = j-l; 
 		int riga = i-k;
 		if(col<0 ^ riga <0)
@@ -209,7 +208,7 @@ public class Client {
 		return val;
 	}
 	
-	public void convertiStringaMossa(String mossa){
+	public static void convertiStringaMossa(String mossa){
 		char[] vm = mossa.toCharArray();
 		int i = corrispondenza(vm[0]);//indice posizione di partenza della prima pedina del gruppo
 		int k = corrispondenza(vm[2]);//indice posizione di partenza dell'ultima pedina del gruppo
@@ -218,7 +217,7 @@ public class Client {
 		scacchiera.aggiornaScacchiera(i,Character.getNumericValue(vm[1]),k,Character.getNumericValue(vm[3]),j,Character.getNumericValue(vm[5]),l,Character.getNumericValue(vm[7]));
 	}
 
-	private char corrispondenzaR(int indice) {
+	private static char corrispondenzaR(int indice) {
 		switch(indice){
 			case 1:
 				return 'A';
@@ -243,7 +242,7 @@ public class Client {
 		}
 	}
 	
-	private int corrispondenza(char indice) {
+	private static int corrispondenza(char indice) {
 		char x = Character.toUpperCase(indice);
 		switch(x){
 			case 'A':
@@ -269,37 +268,47 @@ public class Client {
 		}
 	}
 
-	
+	public static void stampa(byte[][] s){
+		String x = " ABCDEFGHI ";
+		System.out.println("    1 2 3 4 5 6 7 8 9  ");
+		for(int i=0; i<s.length; i++){
+			System.out.print(x.charAt(i)+ " ");
+			for(int j=0; j<s.length; j++)
+				System.out.print((s[i][j]) + " ");
+		System.out.println();
+		}
+	}
 	
 	/**
 	 * Runs the client as an application.
 	 */
-//	public static void main(String[] args) throws Exception {
-////		String serverAddress = (args.length == 0) ? "localhost" : args[0];
-////		int serverPort = (args.length == 0) ? 8901 : Integer.parseInt(args[1]);
-////		Client client = new Client(serverAddress, serverPort);
-////		client.play();
-//		in1 = new BufferedReader(new InputStreamReader(System.in));
-//		long startTime, endTime;
-//		double v;
-//		String mossa; 
-//		stampa(scacchiera);
-//		distanza();
-//		while(true){
-//			System.out.println("Inserire mossa>> ");
-//			mossa = in1.readLine();
-//			startTime = System.nanoTime();
-//			convertiStringaMossa(mossa);
-//			stampa(scacchiera);
-//			endTime = System.nanoTime();
-//			System.out.println("\nPedine nere mangiate:    " + nereCatturate);
-//			System.out.println("Pedine bianche mangiate: " + biancheCatturate + "\n");
-//			System.out.println("Ho finito in : " + (endTime-startTime) + " ns." );
-//			startTime = System.nanoTime();
-//			/*v= valutaMossa(scacchiera, "BiancO", 0, 8);
-//			endTime = System.nanoTime();
-//			System.out.println("La valutazione della scacchiera è: " + v + "\n");
-//			System.out.println("Ho finito in : " + (endTime-startTime) + " ns." );*/
-//		}
-//	}
+	public static void main(String[] args) throws Exception {
+//		String serverAddress = (args.length == 0) ? "localhost" : args[0];
+//		int serverPort = (args.length == 0) ? 8901 : Integer.parseInt(args[1]);
+//		Client client = new Client(serverAddress, serverPort);
+//		client.play();
+		in1 = new BufferedReader(new InputStreamReader(System.in));
+		long startTime, endTime;
+		double v;
+		String mossa;
+		scacchiera = new Scacchiera();
+		stampa(scacchiera.getScacchiera());
+		distanza();
+		while(true){
+			System.out.println("Inserire mossa>> ");
+			mossa = in1.readLine();
+			startTime = System.nanoTime();
+			convertiStringaMossa(mossa);
+			stampa(scacchiera.getScacchiera());
+			endTime = System.nanoTime();
+			System.out.println("\nPedine nere mangiate:    " + scacchiera.getNereCatturate());
+			System.out.println("Pedine bianche mangiate: " + scacchiera.getBiancheCatturate() + "\n");
+			System.out.println("Ho finito in : " + (endTime-startTime) + " ns." );
+			startTime = System.nanoTime();
+			/*v= valutaMossa(scacchiera, "BiancO", 0, 8);
+			endTime = System.nanoTime();
+			System.out.println("La valutazione della scacchiera è: " + v + "\n");
+			System.out.println("Ho finito in : " + (endTime-startTime) + " ns." );*/
+		}
+	}
 }
