@@ -46,7 +46,7 @@ public class Scacchiera {
 	}
 	
 	public byte[][] getScacchiera(){
-		return scacchiera;
+		return this.scacchiera;
 	}
 	
 	
@@ -187,7 +187,6 @@ public class Scacchiera {
 					}
 				}
 	}
-
 	
 	private void traslaDiagonale (int numeroPedine, int i, int n1, int j, int n2){
 		byte side = getSide(i, n1);
@@ -321,16 +320,4 @@ public class Scacchiera {
 	private byte getSide(int i, int numericValue) {
 		return (scacchiera[i][numericValue] == 2)? bianco: nero;
 	}
-	
-	public void stampa(byte[][] s){
-		String x = " ABCDEFGHI ";
-		System.out.println("    1 2 3 4 5 6 7 8 9  ");
-		for(int i=0; i<s.length; i++){
-			System.out.print(x.charAt(i)+ " ");
-			for(int j=0; j<s.length; j++)
-				System.out.print((s[i][j]) + " ");
-		System.out.println();
-		}
-	}
-
 }
