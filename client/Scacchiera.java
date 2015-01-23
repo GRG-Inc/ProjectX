@@ -48,6 +48,7 @@ public class Scacchiera {
 	}
 	
 	//FIXME ===============> da testare
+	//È il caso di farlo statico?
 	public boolean esisteCella(int riga, int colonna){
 		if(riga >= 1 && riga <= 9 && colonna >= minColumn[riga] && colonna<= maxColumn[riga])
 			return true;
