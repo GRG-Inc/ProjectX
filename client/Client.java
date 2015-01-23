@@ -189,11 +189,56 @@ public class Client {
 								}
 							}else if(direzioni[k]==2){
 								//NORD-OVEST
+								if(scacFuturaClass.esisteCella(i-1, j-1)){//FIXME
+									if(scacFutura[i-1][j-1] == 1){//una pedina
+										scacFuturaClass.aggiornaScacchiera(i, j, i, j, i-1, j-1, i-1, j-1);
+										String side =s.equals("bianco") ? "nero":"bianco";
+										//FIXME alfabeta da definire 
+										valutaMossa(scacFuturaClass, side, depth-1, alfabeta);
+									}else if(scacFutura[i-1][j-1] == s1){// due pedine allineate
+											if(scacFuturaClass.esisteCella(i-2, j-2)){
+												if(scacFutura[i-2][j-2] == 1){// la cella controllata è vuota quindi mi sposto li
+													scacFuturaClass.aggiornaScacchiera(i, j, i-1, j-1, i-1, j-1, i-2, j-2);// da controllare
+													String side =s.equals("bianco") ? "nero":"bianco";
+													//FIXME alfabeta da definire 
+													valutaMossa(scacFuturaClass, side, depth-1, alfabeta);
+												}else if(scacFutura[i-2][j-2] == s2 && scacFuturaClass.esisteCella(i-3, j-3) && scacFutura[i-3][j-3] == 1){//NOTA: if annestati per controllare una sola volta esistenza celle per i-3, i-4 ecc ecc 
+														scacFuturaClass.aggiornaScacchiera(i, j, i-1, j-1, i-1, j-1, i-2, j-2);// da controllare, la pedina avversaria non viene toccata
+														String side =s.equals("bianco") ? "nero":"bianco";
+														//FIXME alfabeta da definire 
+														valutaMossa(scacFuturaClass, side, depth-1, alfabeta);
+														}else if(scacFutura[i-2][j-2] == s1 ){//tre pedine allineate
+														if(scacFuturaClass.esisteCella(i-3, j-3)){
+															if(scacFutura[i-3][j-3] == s1){//cella vuota
+																scacFuturaClass.aggiornaScacchiera(i, j, i-2, j-2, i-1, j-1, i-3, j-3);// da controllare
+																String side =s.equals("bianco") ? "nero":"bianco";
+																//FIXME alfabeta da definire 
+																valutaMossa(scacFuturaClass, side, depth-1, alfabeta);
+															}else if(scacFutura[i-3][j-3] == s2 && scacFuturaClass.esisteCella(i-4, j-4)){//c'è avversario
+																	if(scacFutura[i-4][j-4] == 1){
+																		scacFuturaClass.aggiornaScacchiera(i, j, i-3, j-3, i-1, j-1, i-4, j-4);// da controllare
+																		String side =s.equals("bianco") ? "nero":"bianco";
+																		//FIXME alfabeta da definire 
+																		valutaMossa(scacFuturaClass, side, depth-1, alfabeta);
+																	}else if(scacFutura[i-4][j-4] == s2){
+																			if(scacFuturaClass.esisteCella(i-5, j-5) && scacFutura[i-5][j-5] == 1){
+																				scacFuturaClass.aggiornaScacchiera(i, j, i-3, j-3, i-1, j-1, i-4, j-4);// da controllare, la pedina avversaria non viene toccata
+																				String side =s.equals("bianco") ? "nero":"bianco";
+																				//FIXME alfabeta da definire 
+																				valutaMossa(scacFuturaClass, side, depth-1, alfabeta);
+																			}
+																	}
+																}
+															}
+													}
+											}
+									}
+								}
+								
 							}else if(direzioni[k]==3){
 								//OVEST
-								
 								if(scacFuturaClass.esisteCella(i, j-1)){//FIXME
-									if(scacFutura[i-1][j] == 1){//una pedina
+									if(scacFutura[i][j-1] == 1){//una pedina
 										scacFuturaClass.aggiornaScacchiera(i, j, i, j, i, j-1, i, j-1);
 										String side =s.equals("bianco") ? "nero":"bianco";
 										//FIXME alfabeta da definire 
@@ -287,8 +332,98 @@ public class Client {
 								}	
 							}else if(direzioni[k]==5){
 								//SUD-EST
+								if(scacFuturaClass.esisteCella(i+1, j+1)){//FIXME
+									if(scacFutura[i+1][j+1] == 1){//una pedina
+										scacFuturaClass.aggiornaScacchiera(i, j, i, j, i+1, j+1, i+1, j+1);
+										String side =s.equals("bianco") ? "nero":"bianco";
+										//FIXME alfabeta da definire 
+										valutaMossa(scacFuturaClass, side, depth-1, alfabeta);
+									}else if(scacFutura[i+1][j+1] == s1){// due pedine allineate
+											if(scacFuturaClass.esisteCella(i+2, j+2)){
+												if(scacFutura[i+2][j+2] == 1){// la cella controllata è vuota quindi mi sposto li
+													scacFuturaClass.aggiornaScacchiera(i, j, i+1, j+1, i+1, j+1, i+2, j+2);// da controllare
+													String side =s.equals("bianco") ? "nero":"bianco";
+													//FIXME alfabeta da definire 
+													valutaMossa(scacFuturaClass, side, depth-1, alfabeta);
+												}else if(scacFutura[i+2][j+2] == s2 && scacFuturaClass.esisteCella(i+3, j+3) && scacFutura[i+3][j+3] == 1){//NOTA: if annestati per controllare una sola volta esistenza celle per i-3, i-4 ecc ecc 
+														scacFuturaClass.aggiornaScacchiera(i, j, i+1, j+1, i+1, j+1, i+2, j+2);// da controllare, la pedina avversaria non viene toccata
+														String side =s.equals("bianco") ? "nero":"bianco";
+														//FIXME alfabeta da definire 
+														valutaMossa(scacFuturaClass, side, depth-1, alfabeta);
+														}else if(scacFutura[i+2][j+2] == s1 ){//tre pedine allineate
+														if(scacFuturaClass.esisteCella(i+3, j+3)){
+															if(scacFutura[i+3][j+3] == s1){//cella vuota
+																scacFuturaClass.aggiornaScacchiera(i, j, i+2, j+2, i+1, j+1, i+3, j+3);// da controllare
+																String side =s.equals("bianco") ? "nero":"bianco";
+																//FIXME alfabeta da definire 
+																valutaMossa(scacFuturaClass, side, depth-1, alfabeta);
+															}else if(scacFutura[i+3][j+3] == s2 && scacFuturaClass.esisteCella(i+4, j+4)){//c'è avversario
+																	if(scacFutura[i+4][j+4] == 1){
+																		scacFuturaClass.aggiornaScacchiera(i, j, i+3, j+3, i+1, j+1, i+4, j+4);// da controllare
+																		String side =s.equals("bianco") ? "nero":"bianco";
+																		//FIXME alfabeta da definire 
+																		valutaMossa(scacFuturaClass, side, depth-1, alfabeta);
+																	}else if(scacFutura[i+4][j+4] == s2){
+																			if(scacFuturaClass.esisteCella(i+5, j+5) && scacFutura[i+5][j+5] == 1){
+																				scacFuturaClass.aggiornaScacchiera(i, j, i+3, j+3, i+1, j+1, i+4, j+4);// da controllare, la pedina avversaria non viene toccata
+																				String side =s.equals("bianco") ? "nero":"bianco";
+																				//FIXME alfabeta da definire 
+																				valutaMossa(scacFuturaClass, side, depth-1, alfabeta);
+																			}
+																	}
+																}
+															}
+													}
+											}
+									}
+								}
 							}else{
 								//EST
+								if(scacFuturaClass.esisteCella(i, j+1)){//FIXME
+									if(scacFutura[i][j+1] == 1){//una pedina
+										scacFuturaClass.aggiornaScacchiera(i, j, i, j, i, j+1, i, j+1);
+										String side =s.equals("bianco") ? "nero":"bianco";
+										//FIXME alfabeta da definire 
+										valutaMossa(scacFuturaClass, side, depth-1, alfabeta);
+									}else if(scacFutura[i][j+1] == s1){// due pedine allineate
+											if(scacFuturaClass.esisteCella(i, j+2)){
+												if(scacFutura[i][j+2] == 1){// la cella controllata è vuota quindi mi sposto li
+													scacFuturaClass.aggiornaScacchiera(i, j, i, j+1, i, j+1, i, j+2);// da controllare
+													String side =s.equals("bianco") ? "nero":"bianco";
+													//FIXME alfabeta da definire 
+													valutaMossa(scacFuturaClass, side, depth-1, alfabeta);
+												}else if(scacFutura[i][j+2] == s2 && scacFuturaClass.esisteCella(i, j+3) && scacFutura[i][j+3] == 1){//NOTA: if annestati per controllare una sola volta esistenza celle per i-3, i-4 ecc ecc 
+														scacFuturaClass.aggiornaScacchiera(i, j, i, j+1, i, j+1, i, j+2);// da controllare, la pedina avversaria non viene toccata
+														String side =s.equals("bianco") ? "nero":"bianco";
+														//FIXME alfabeta da definire 
+														valutaMossa(scacFuturaClass, side, depth-1, alfabeta);
+														}else if(scacFutura[i][j+2] == s1 ){//tre pedine allineate
+														if(scacFuturaClass.esisteCella(i, j+3)){
+															if(scacFutura[i][j-3] == s1){//cella vuota
+																scacFuturaClass.aggiornaScacchiera(i, j, i, j+2, i, j+1, i, j+3);// da controllare
+																String side =s.equals("bianco") ? "nero":"bianco";
+																//FIXME alfabeta da definire 
+																valutaMossa(scacFuturaClass, side, depth-1, alfabeta);
+															}else if(scacFutura[i][j+3] == s2 && scacFuturaClass.esisteCella(i, j+4)){//c'è avversario
+																	if(scacFutura[i][j+4] == 1){
+																		scacFuturaClass.aggiornaScacchiera(i, j, i, j+3, i, j+1, i, j+4);// da controllare
+																		String side =s.equals("bianco") ? "nero":"bianco";
+																		//FIXME alfabeta da definire 
+																		valutaMossa(scacFuturaClass, side, depth-1, alfabeta);
+																	}else if(scacFutura[i][j+4] == s2){
+																			if(scacFuturaClass.esisteCella(i, j+5) && scacFutura[i][j+5] == 1){
+																				scacFuturaClass.aggiornaScacchiera(i, j, i, j+3, i, j+1, i, j+4);// da controllare, la pedina avversaria non viene toccata
+																				String side =s.equals("bianco") ? "nero":"bianco";
+																				//FIXME alfabeta da definire 
+																				valutaMossa(scacFuturaClass, side, depth-1, alfabeta);
+																			}
+																	}
+																}
+															}
+													}
+											}
+									}
+								}
 							}
 						}
 					}
