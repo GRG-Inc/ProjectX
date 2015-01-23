@@ -213,19 +213,19 @@ public class Client {
 														}else if(scacFutura[i][j-2] == s1 ){//tre pedine allineate
 														if(scacFuturaClass.esisteCella(i, j-3)){
 															if(scacFutura[i][j-3] == s1){//cella vuota
-																scacFuturaClass.aggiornaScacchiera(i, j, i-2, j, i-1, j, i-3, j);// da controllare
+																scacFuturaClass.aggiornaScacchiera(i, j, i, j-2, i, j-1, i, j-3);// da controllare
 																String side =s.equals("bianco") ? "nero":"bianco";
 																//FIXME alfabeta da definire 
 																valutaMossa(scacFuturaClass, side, depth-1, alfabeta);
-															}else if(scacFutura[i-3][j] == s2 && scacFuturaClass.esisteCella(i-4, j)){//c'è avversario
-																	if(scacFutura[i-4][j] == 1){
-																		scacFuturaClass.aggiornaScacchiera(i, j, i-3, j, i-1, j, i-4, j);// da controllare
+															}else if(scacFutura[i][j-3] == s2 && scacFuturaClass.esisteCella(i, j-4)){//c'è avversario
+																	if(scacFutura[i][j-4] == 1){
+																		scacFuturaClass.aggiornaScacchiera(i, j, i, j-3, i, j-1, i, j-4);// da controllare
 																		String side =s.equals("bianco") ? "nero":"bianco";
 																		//FIXME alfabeta da definire 
 																		valutaMossa(scacFuturaClass, side, depth-1, alfabeta);
-																	}else if(scacFutura[i-4][j] == s2){
-																			if(scacFuturaClass.esisteCella(i-5, j) && scacFutura[i-5][j] == 1){
-																				scacFuturaClass.aggiornaScacchiera(i, j, i-3, j, i-1, j, i-4, j);// da controllare, la pedina avversaria non viene toccata
+																	}else if(scacFutura[i][j-4] == s2){
+																			if(scacFuturaClass.esisteCella(i, j-5) && scacFutura[i][j-5] == 1){
+																				scacFuturaClass.aggiornaScacchiera(i, j, i, j-3, i, j-1, i, j-4);// da controllare, la pedina avversaria non viene toccata
 																				String side =s.equals("bianco") ? "nero":"bianco";
 																				//FIXME alfabeta da definire 
 																				valutaMossa(scacFuturaClass, side, depth-1, alfabeta);
