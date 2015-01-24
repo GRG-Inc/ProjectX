@@ -4,7 +4,7 @@ public class Scacchiera {
 	
 	//0= casella non valida, 1=casella vuota, 2=pedina bianca, 3=pedina nera
 	private byte[][] scacchiera;
-	private int nereCatturate=0, biancheCatturate=0;//nereCatturate e' il numero di pedine perse da side1
+	private int nereCatturate=0, biancheCatturate=0;//nereCatturate e' il numero di pedine perse da side1	
 //	private HashMap<Integer, Integer> distance = new HashMap<Integer, Integer>();
 //	private byte[] direzioni = {1,2,3,4,5,6};//N,NO,O,S,SE,E
 	private final static int[] minColumn = { 1, 1, 1, 1, 1, 1, 2, 3, 4, 5}; //da che colonna inizia la scacchiera per ogni riga compresa cornice
@@ -27,12 +27,22 @@ public class Scacchiera {
 				{ 0, 0, 0, 0, 3, 3, 3, 2, 2, 2, 0 }, // H
 				{ 0, 0, 0, 0, 0, 3, 3, 1, 2, 2, 0 }, // I
 				{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 } };
+		
+		//this.nereCatturate = 0;
+		//this.biancheCatturate = 0;
 	}
 	
-	public Scacchiera(byte[][] scac, int nerePerse, int bianchePerse){
-		this.scacchiera=scac.clone();
-		this.nereCatturate = nerePerse;
-		this.biancheCatturate = bianchePerse;
+	public Scacchiera clona(){
+		Scacchiera clone=new Scacchiera();
+		byte[][] t = new byte[11][11];
+		for(int i = 0 ; i < 11 ; i++)
+			for(int j = 0 ; j < 11 ; j++){
+				t[i][j] = scacchiera[i][j];
+			}
+		clone.scacchiera = t;
+		clone.nereCatturate = nereCatturate;
+		clone.biancheCatturate = biancheCatturate;
+		return clone;
 	}
 	
 	public int getBiancheCatturate(){
