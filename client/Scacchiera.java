@@ -61,8 +61,6 @@ public class Scacchiera {
 	//� il caso di farlo statico?
 	public boolean esisteCella(int riga, int colonna){
 		return (riga >= 1 && riga <= 9 && colonna >= minColumn[riga] && colonna<= maxColumn[riga]);
-			//return true;
-		//return false;
 	}
 
 	
