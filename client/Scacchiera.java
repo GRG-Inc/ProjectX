@@ -3,7 +3,18 @@ package client;
 public class Scacchiera {
 	
 	//0= casella non valida, 1=casella vuota, 2=pedina bianca, 3=pedina nera
-	private byte[][] scacchiera;
+	private byte[][] scacchiera = new byte[][]{ 
+			{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+			{ 0, 2, 2, 1, 3, 3, 0, 0, 0, 0, 0 }, // A
+			{ 0, 2, 2, 2, 3, 3, 3, 0, 0, 0, 0 }, // B
+			{ 0, 1, 2, 2, 1, 3, 3, 1, 0, 0, 0 }, // C
+			{ 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0 }, // D
+			{ 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0 }, // E
+			{ 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0 }, // F
+			{ 0, 0, 0, 1, 3, 3, 1, 2, 2, 1, 0 }, // G
+			{ 0, 0, 0, 0, 3, 3, 3, 2, 2, 2, 0 }, // H
+			{ 0, 0, 0, 0, 0, 3, 3, 1, 2, 2, 0 }, // I
+			{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 } };;
 	private int nereCatturate=0, biancheCatturate=0;//nereCatturate e' il numero di pedine perse da side1	
 //	private HashMap<Integer, Integer> distance = new HashMap<Integer, Integer>();
 //	private byte[] direzioni = {1,2,3,4,5,6};//N,NO,O,S,SE,E
@@ -11,26 +22,6 @@ public class Scacchiera {
 	private final static int[] maxColumn = { 5, 5, 6, 7, 8, 9, 9, 9, 9, 9}; //a che colonna finisce la scacchiera per ogni riga compresa cornice
 	private final byte bianco=2, nero=3;
 //	private Integer dist;
-	
-	
-		  
-	
-	public Scacchiera(){
-		this.scacchiera = new byte[][]{ { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-				{ 0, 2, 2, 1, 3, 3, 0, 0, 0, 0, 0 }, // A
-				{ 0, 2, 2, 2, 3, 3, 3, 0, 0, 0, 0 }, // B
-				{ 0, 1, 2, 2, 1, 3, 3, 1, 0, 0, 0 }, // C
-				{ 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0 }, // D
-				{ 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0 }, // E
-				{ 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0 }, // F
-				{ 0, 0, 0, 1, 3, 3, 1, 2, 2, 1, 0 }, // G
-				{ 0, 0, 0, 0, 3, 3, 3, 2, 2, 2, 0 }, // H
-				{ 0, 0, 0, 0, 0, 3, 3, 1, 2, 2, 0 }, // I
-				{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 } };
-		
-		//this.nereCatturate = 0;
-		//this.biancheCatturate = 0;
-	}
 	
 	public Scacchiera clona(){
 		Scacchiera clone=new Scacchiera();
@@ -58,7 +49,7 @@ public class Scacchiera {
 	}
 	
 	//FIXME ===============> da testare
-	//� il caso di farlo statico?
+	//e' il caso di farlo statico?
 	public boolean esisteCella(int riga, int colonna){
 		return (riga >= 1 && riga <= 9 && colonna >= minColumn[riga] && colonna<= maxColumn[riga]);
 	}
@@ -74,8 +65,6 @@ public class Scacchiera {
 				numeroPedine = Math.abs(origP2 - origU2) + 1; //RIGA PEZZ'I MMERDA(POTREBBE GENERARE ERRORE!!!!!!!!!!)
 			else
 				numeroPedine = Math.abs(origP1-origU1) + 1;
-			
-			System.out.println("numero pedine mosse: " + numeroPedine);
 			byte side1 = getSide(origP1, origP2);
 			if(numeroPedine == 1){
 				scacchiera[destP1][destP2] = side1;
@@ -83,7 +72,6 @@ public class Scacchiera {
 				return;
 			}
 			if(origP1 == destP1 && origU1 == destU1){//movimento orizzontale
-				System.out.println("movimento orizzontale");
 				if(origP1 == origU1){//movimento sulla stessa riga
 					if((origP2 - destP2) < 0 ){//movimento verso destra
 						dir1=false;
@@ -114,13 +102,11 @@ public class Scacchiera {
 						}						
 					}
 				}else if (origP2 == origU2){//movimento di pedine allineate verticalmente
-					System.out.println("pedine allineate verticalmente");
 					traslaColonna(numeroPedine, origP1, origP2, destP1, destP2);
 				}else{
 					traslaDiagonale(numeroPedine, origP1, origP2, destP1, destP2);
 				}
 			}else if(origP2 == destP2 && origU2 == destU2){
-				System.out.println("mov verticale");//movimento verticale
 				if(origP2 == origU2){//movimento sulla stessa colonna
 					if(origP1 > destP1 ){//movimento verso l'alto 
 						dir2=false;
@@ -152,14 +138,12 @@ public class Scacchiera {
 						}
 					}
 				}else if(origP1 == origU1){//movimento di pedine allineate orizzontalmente 
-					System.out.println("trasla pedine allineate orizzontalmente");
 					traslaRiga(numeroPedine, origP1, origP2, destP1, destP2);
 				}else{
 					traslaDiagonale(numeroPedine, origP1, origP2, destP1, destP2);
 					
 				}
 			}else if(origP1 < destP1 && origU1 < destU1 && origP2 < destP2 && origU2 < destU2){//movimento sud-est
-				System.out.println("movimento SE");
 				if(origP1 == origU1){//pedine allineate orizzontalmente(singola o gruppo?)
 					traslaRiga(numeroPedine,origP1,origP2,destP1,destP2);
 				}else if(origP2 == origU2){//pedine allineate verticalmente (singola o gruppo?)
@@ -179,7 +163,6 @@ public class Scacchiera {
 						}
 					}
 			}else if(origP1 > destP1 && origU1 > destU1 && origP2 > destP2 && origU2 > destU2){//movimento nord-ovest
-				System.out.println("movimento NO");
 				if(origP1 == origU1){//pedine allineate orizzontalmente(singola o gruppo?)
 					traslaRiga(numeroPedine, origP1, origP2, destP1, destP2);
 				}else if(origP2 == origU2){//pedine allineate verticalmente (singola o gruppo?)
@@ -215,7 +198,6 @@ public class Scacchiera {
 	}
 	
 	private void traslaColonna(int numeroPedine, int i, int n1, int j, int n2) {
-		System.out.println("trasla colonna");
 		byte side = getSide(i, n1);
 		scacchiera[j][n2] = side;
 		scacchiera[j+1][n2] = side;
@@ -228,7 +210,6 @@ public class Scacchiera {
 	}
 	
 	private void traslaRiga(int numeroPedine, int i, int n1, int j, int n2) {
-		System.out.println("trasla riga");
 		byte side = getSide(i, n1);
 		scacchiera[j][n2] = side;
 		scacchiera[j][n2+1] = side;
