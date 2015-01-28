@@ -14,7 +14,7 @@ public class Client {
 	private static String mossaFinale;
 	private static BufferedReader in,in1;
 	private static PrintWriter out;
-	private static final byte[] CostiCattura = { 0, 4, 6, 8, 12, 18, 100 };
+	private static final byte[] CostiCattura = { 0, 8, 12, 16, 24, 36, 100 };
 	private final static int[] minColumn = { 1, 1, 1, 1, 1, 1, 2, 3, 4, 5}; //da che colonna inizia la scacchiera per ogni riga compresa cornice
 	private final static int[] maxColumn = { 5, 5, 6, 7, 8, 9, 9, 9, 9, 9}; //a che colonna finisce la scacchiera per ogni riga compresa cornice
 	private static byte[] direzioni = {1,2,3,4,5,6};//N,NO,O,S,SE,E
@@ -122,10 +122,9 @@ public class Client {
 			double w1 = 1,w2 = 1,w3 = 1; //pesi
 			double centerDist = 0, coesione = 0, premioCatt = 0, penaleCatt = 0;
 			if(s1==2){
-				if(scacchiera2.getBiancheCatturate()<7 && scacchiera2.getNereCatturate()<7){//FIXME // mangia 7 pedine bianche e da errore
-					premioCatt = CostiCattura[scacchiera2.getNereCatturate()];
-					penaleCatt = CostiCattura[scacchiera2.getBiancheCatturate()];
-				}
+				//FIXME // mangia 7 pedine bianche e da errore
+				premioCatt = CostiCattura[scacchiera2.getNereCatturate()];
+				penaleCatt = CostiCattura[scacchiera2.getBiancheCatturate()];
 			}else{
 				premioCatt = CostiCattura[scacchiera2.getBiancheCatturate()];
 				penaleCatt = CostiCattura[scacchiera2.getNereCatturate()];
@@ -133,32 +132,33 @@ public class Client {
 			for(int i = 1; i<10; i++)
 				for(int j = minColumn[i]; j <= maxColumn[i]; j++){
 					if(scacc[i][j] == s1){
-						centerDist += 0.1;
+						centerDist += 1/((int)distance.get(i*1000+j*100+5*10+5) + 1);
 						coesione += calcolaCoesione(scacc,i,j);
 					}else if(scacc[i][j] == s2){
-						centerDist -= 0.1;
+						centerDist -= 5/((int)distance.get(i*1000+j*100+5*10+5) + 1);
 						coesione -= calcolaCoesione(scacc,i,j);
 					}
 				}
-			return w1*centerDist + w2*coesione + w3*premioCatt + w3*penaleCatt;
+			return w1*centerDist + w2*coesione + w3*premioCatt - w3*penaleCatt;
 		}else{
 			//genera configurazione futura
 			double bestValue = Double.POSITIVE_INFINITY, currValue, ab = alfabeta;
 			String m = null, mossa = null;
-			Scacchiera scacFuturaClass = scacchiera2.clona();
-			byte[][] scacFutura= scacFuturaClass.getScacchiera();
+			Scacchiera scacFuturaClass;
+			byte[][] scac = scacchiera2.getScacchiera(), scacFutura;
 			aleg: for(int i=1; i<10; i++){
 					for(int j = minColumn[i]; j<=maxColumn[i]; j++){
 						if(scacc[i][j] == s1){
 							for(int k = 0; k < direzioni.length; k++){
 								if(direzioni[k]==1){//NORD
-									//va fatto il pruning e va valutata la funzione restituita
-									if(scacFuturaClass.esisteCella(i-1, j)){//FIXME
-										if(scacFutura[i-1][j] == 1){//una pedina
+									if(scacchiera2.esisteCella(i-1, j)){//FIXME
+										if(scac[i-1][j] == 1){//una pedina
+											scacFuturaClass = scacchiera2.clona();
+											scacFutura = scacFuturaClass.getScacchiera();
 											scacFuturaClass.aggiornaScacchiera(i, j, i, j, i-1, j, i-1, j);
 											m = generaStringaMossa(i, j, i, j, i-1, j, i-1, j);
-											ab = ab == Double.NEGATIVE_INFINITY ? ab: -ab;
-											currValue = valutaMossa(scacFuturaClass, side2, depth-1, ab);
+											
+											currValue = valutaMossa(scacFuturaClass, side2, depth-1, ab == Double.NEGATIVE_INFINITY ? ab: -ab);
 											if(currValue < bestValue){
 												bestValue = currValue;
 												mossa = m;
@@ -166,13 +166,15 @@ public class Client {
 											if (alfabeta > bestValue)
 												break aleg;
 											ab = bestValue;
-										}else if(scacFutura[i-1][j] == s1){// due pedine allineate
-												if(scacFuturaClass.esisteCella(i-2, j)){
-													if(scacFutura[i-2][j] == 1){// la cella controllata è vuota quindi mi sposto li
-														scacFuturaClass.aggiornaScacchiera(i, j, i-1, j, i-1, j, i-2, j);// da controllare
-														m = generaStringaMossa(i, j, i-1, j, i-1, j, i-2, j);
-														ab = ab == Double.NEGATIVE_INFINITY ? ab: -ab;
-														currValue = valutaMossa(scacFuturaClass, side2, depth-1, ab);
+										}else if(scac[i-1][j] == s1){// due pedine allineate
+												if(scacchiera2.esisteCella(i-2, j)){
+													if(scac[i-2][j] == 1){// la cella controllata è vuota quindi mi sposto li
+														scacFuturaClass = scacchiera2.clona();
+														scacFutura = scacFuturaClass.getScacchiera();
+														scacFuturaClass.aggiornaScacchiera(i-1, j, i, j, i-2, j, i-1, j);//indici invertiti per avere indici mossa ordinati correttaete per tutto il caso NORD
+														m = generaStringaMossa(i-1, j, i, j, i-2, j, i-1, j);
+														
+														currValue = valutaMossa(scacFuturaClass, side2, depth-1, ab == Double.NEGATIVE_INFINITY ? ab: -ab);
 														if(currValue < bestValue){
 															bestValue = currValue;
 															mossa = m;
@@ -180,11 +182,13 @@ public class Client {
 														if (alfabeta > bestValue)
 															break aleg;
 														ab = bestValue;
-													}else if(scacFutura[i-2][j] == s2 && ((scacFuturaClass.esisteCella(i-3, j) && scacFutura[i-3][j] == 1) || scacFutura[i-3][j] == 0 )){//NOTA: if innestati per controllare una sola volta esistenza celle per i-3, i-4 ecc ecc 
-															scacFuturaClass.aggiornaScacchiera(i, j, i-1, j, i-1, j, i-2, j);// da controllare, la pedina avversaria non viene toccata
-															m = generaStringaMossa(i, j, i-1, j, i-1, j, i-2, j);
-															ab = ab == Double.NEGATIVE_INFINITY ? ab: -ab;
-															currValue = valutaMossa(scacFuturaClass, side2, depth-1, ab);
+													}else if(scac[i-2][j] == s2 && ((scacchiera2.esisteCella(i-3, j) && scac[i-3][j] == 1) || scac[i-3][j] == 0 )){//NOTA: if innestati per controllare una sola volta esistenza celle per i-3, i-4 ecc ecc 
+															scacFuturaClass = scacchiera2.clona();
+															scacFutura = scacFuturaClass.getScacchiera();
+															scacFuturaClass.aggiornaScacchiera(i-1, j, i, j, i-2, j, i-1, j);
+															m = generaStringaMossa(i-1, j, i, j, i-2, j, i-1, j);
+															
+															currValue = valutaMossa(scacFuturaClass, side2, depth-1, ab == Double.NEGATIVE_INFINITY ? ab: -ab);
 															if(currValue < bestValue){
 																bestValue = currValue;
 																mossa = m;
@@ -192,14 +196,15 @@ public class Client {
 															if (alfabeta > bestValue)
 																break aleg;
 															ab = bestValue;
-														}else if(scacFutura[i-2][j] == s1 ){//tre pedine allineate
-															if(scacFuturaClass.esisteCella(i-3, j)){
-																if(scacFutura[i-3][j] == 1){//cella vuota
-																	scacFuturaClass.aggiornaScacchiera(i, j, i-2, j, i-1, j, i-3, j);// da controllare
-																	//FIXME alfabeta da definire
-																	m = generaStringaMossa(i, j, i-2, j, i-1, j, i-3, j);
-																	ab = ab == Double.NEGATIVE_INFINITY ? ab: -ab;
-																	currValue = valutaMossa(scacFuturaClass, side2, depth-1, ab);
+														}else if(scac[i-2][j] == s1 ){//tre pedine allineate
+															if(scacchiera2.esisteCella(i-3, j)){
+																if(scac[i-3][j] == 1){//cella vuota
+																	scacFuturaClass = scacchiera2.clona();
+																	scacFutura = scacFuturaClass.getScacchiera();
+																	scacFuturaClass.aggiornaScacchiera(i-2, j, i, j, i-3, j, i-1, j);
+																	m = generaStringaMossa(i-2, j, i, j, i-3, j, i-1, j);
+																	
+																	currValue = valutaMossa(scacFuturaClass, side2, depth-1, ab == Double.NEGATIVE_INFINITY ? ab: -ab);
 																	if(currValue < bestValue){
 																		bestValue = currValue;
 																		mossa = m;
@@ -207,12 +212,14 @@ public class Client {
 																	if (alfabeta > bestValue)
 																		break aleg;
 																	ab = bestValue;
-																}else if(scacFutura[i-3][j] == s2 && scacFuturaClass.esisteCella(i-4, j)){//c'è avversario
-																		if(scacFutura[i-4][j] == 1){
-																			scacFuturaClass.aggiornaScacchiera(i, j, i-2, j, i-1, j, i-3, j);// da controllare
-																			m = generaStringaMossa(i, j, i-2, j, i-1, j, i-3, j);
-																			ab = ab == Double.NEGATIVE_INFINITY ? ab: -ab;
-																			currValue = valutaMossa(scacFuturaClass, side2, depth-1, ab);
+																}else if(scac[i-3][j] == s2 && scacchiera2.esisteCella(i-4, j)){//c'è avversario
+																		if(scac[i-4][j] == 1){
+																			scacFuturaClass = scacchiera2.clona();
+																			scacFutura = scacFuturaClass.getScacchiera();
+																			scacFuturaClass.aggiornaScacchiera(i-2, j, i, j, i-3, j, i-1, j);
+																			m = generaStringaMossa(i-2, j, i, j, i-3, j, i-1, j);
+																			
+																			currValue = valutaMossa(scacFuturaClass, side2, depth-1, ab == Double.NEGATIVE_INFINITY ? ab: -ab);
 																			if(currValue < bestValue){
 																				bestValue = currValue;
 																				mossa = m;
@@ -220,12 +227,14 @@ public class Client {
 																			if (alfabeta > bestValue)
 																				break aleg;
 																			ab = bestValue;
-																		}else if(scacFutura[i-4][j] == s2){
-																				if(scacFuturaClass.esisteCella(i-5, j) && scacFutura[i-5][j] == 1){
-																					scacFuturaClass.aggiornaScacchiera(i, j, i-2, j, i-1, j, i-3, j);// da controllare, la pedina avversaria non viene toccata
-																					m = generaStringaMossa(i, j, i-2, j, i-1, j, i-3, j);
-																					ab = ab == Double.NEGATIVE_INFINITY ? ab: -ab;
-																					currValue = valutaMossa(scacFuturaClass, side2, depth-1, ab);
+																		}else if(scac[i-4][j] == s2){
+																				if(scacchiera2.esisteCella(i-5, j) && scac[i-5][j] == 1){
+																					scacFuturaClass = scacchiera2.clona();
+																					scacFutura = scacFuturaClass.getScacchiera();
+																					scacFuturaClass.aggiornaScacchiera(i-2, j, i, j, i-3, j, i-1, j);
+																					m = generaStringaMossa(i-2, j, i, j, i-3, j, i-1, j);
+																					
+																					currValue = valutaMossa(scacFuturaClass, side2, depth-1, ab == Double.NEGATIVE_INFINITY ? ab: -ab);
 																					if(currValue < bestValue){
 																						bestValue = currValue;
 																						mossa = m;
@@ -233,11 +242,13 @@ public class Client {
 																					if (alfabeta > bestValue)
 																						break aleg;
 																					ab = bestValue;
-																				}else if(scacFutura[i-5][j] == 0){
-																					scacFuturaClass.aggiornaScacchiera(i, j, i-2, j, i-1, j, i-3, j);// da controllare, la pedina avversaria non viene toccata
-																					m = generaStringaMossa(i, j, i-2, j, i-1, j, i-3, j);
-																					ab = ab == Double.NEGATIVE_INFINITY ? ab: -ab;
-																					currValue = valutaMossa(scacFuturaClass, side2, depth-1, ab);
+																				}else if(scac[i-5][j] == 0){
+																					scacFuturaClass = scacchiera2.clona();
+																					scacFutura = scacFuturaClass.getScacchiera();
+																					scacFuturaClass.aggiornaScacchiera(i-2, j, i, j, i-3, j, i-1, j);
+																					m = generaStringaMossa(i-2, j, i, j, i-3, j, i-1, j);
+																					
+																					currValue = valutaMossa(scacFuturaClass, side2, depth-1, ab == Double.NEGATIVE_INFINITY ? ab: -ab);
 																					if(currValue < bestValue){
 																						bestValue = currValue;
 																						mossa = m;
@@ -247,11 +258,13 @@ public class Client {
 																					ab = bestValue;
 																				}
 																		}
-																	}else if(scacFutura[i-3][j] == s2 && scacFutura[i-4][j] == 0){
-																		scacFuturaClass.aggiornaScacchiera(i, j, i-2, j, i-1, j, i-3, j);// da controllare
-																		m = generaStringaMossa(i, j, i-2, j, i-1, j, i-3, j);
-																		ab = ab == Double.NEGATIVE_INFINITY ? ab: -ab;
-																		currValue = valutaMossa(scacFuturaClass, side2, depth-1, ab);
+																	}else if(scac[i-3][j] == s2 && scac[i-4][j] == 0){
+																		scacFuturaClass = scacchiera2.clona();
+																		scacFutura = scacFuturaClass.getScacchiera();
+																		scacFuturaClass.aggiornaScacchiera(i-2, j, i, j, i-3, j, i-1, j);
+																		m = generaStringaMossa(i-2, j, i, j, i-3, j, i-1, j);
+																		
+																		currValue = valutaMossa(scacFuturaClass, side2, depth-1, ab == Double.NEGATIVE_INFINITY ? ab: -ab);
 																		if(currValue < bestValue){
 																			bestValue = currValue;
 																			mossa = m;
@@ -267,12 +280,14 @@ public class Client {
 									}
 								}else if(direzioni[k]==2){
 									//NORD-OVEST
-									if(scacFuturaClass.esisteCella(i-1, j-1)){//FIXME
-										if(scacFutura[i-1][j-1] == 1){//una pedina
+									if(scacchiera2.esisteCella(i-1, j-1)){//FIXME
+										if(scac[i-1][j-1] == 1){//una pedina
+											scacFuturaClass = scacchiera2.clona();
+											scacFutura = scacFuturaClass.getScacchiera();
 											scacFuturaClass.aggiornaScacchiera(i, j, i, j, i-1, j-1, i-1, j-1);
 											m = generaStringaMossa(i, j, i, j, i-1, j-1, i-1, j-1);
-											ab = ab == Double.NEGATIVE_INFINITY ? ab: -ab;
-											currValue = valutaMossa(scacFuturaClass, side2, depth-1, ab);
+											
+											currValue = valutaMossa(scacFuturaClass, side2, depth-1, ab == Double.NEGATIVE_INFINITY ? ab: -ab);
 											if(currValue < bestValue){
 												bestValue = currValue;
 												mossa = m;
@@ -280,13 +295,15 @@ public class Client {
 											if (alfabeta > bestValue)
 												break aleg;
 											ab = bestValue;
-										}else if(scacFutura[i-1][j-1] == s1){// due pedine allineate
-												if(scacFuturaClass.esisteCella(i-2, j-2)){
-													if(scacFutura[i-2][j-2] == 1){// la cella controllata è vuota quindi mi sposto li
-														scacFuturaClass.aggiornaScacchiera(i, j, i-1, j-1, i-1, j-1, i-2, j-2);// da controllare
-														m = generaStringaMossa(i, j, i-1, j-1, i-1, j-1, i-2, j-2);
-														ab = ab == Double.NEGATIVE_INFINITY ? ab: -ab;
-														currValue = valutaMossa(scacFuturaClass, side2, depth-1, ab);
+										}else if(scac[i-1][j-1] == s1){// due pedine allineate
+												if(scacchiera2.esisteCella(i-2, j-2)){
+													if(scac[i-2][j-2] == 1){// la cella controllata è vuota
+														scacFuturaClass = scacchiera2.clona();
+														scacFutura = scacFuturaClass.getScacchiera();
+														scacFuturaClass.aggiornaScacchiera(i-1, j-1, i, j, i-2, j-2, i-1, j-1); //indici NO inertiti per lo stesso motivo del NORD
+														m = generaStringaMossa(i-1, j-1, i, j, i-2, j-2, i-1, j-1);
+														
+														currValue = valutaMossa(scacFuturaClass, side2, depth-1, ab == Double.NEGATIVE_INFINITY ? ab: -ab);
 														if(currValue < bestValue){
 															bestValue = currValue;
 															mossa = m;
@@ -294,11 +311,13 @@ public class Client {
 														if (alfabeta > bestValue)
 															break aleg;
 														ab = bestValue;
-													}else if(scacFutura[i-2][j-2] == s2 && (scacFuturaClass.esisteCella(i-3, j-3) && scacFutura[i-3][j-3] == 1 || scacFutura[i-3][j-3] == 0)){//NOTA: if annestati per controllare una sola volta esistenza celle per i-3, i-4 ecc ecc 
-															scacFuturaClass.aggiornaScacchiera(i, j, i-1, j-1, i-1, j-1, i-2, j-2);// da controllare, la pedina avversaria non viene toccata
-															m = generaStringaMossa(i, j, i-1, j-1, i-1, j-1, i-2, j-2);
-															ab = ab == Double.NEGATIVE_INFINITY ? ab: -ab;
-															currValue = valutaMossa(scacFuturaClass, side2, depth-1, ab);
+													}else if(scac[i-2][j-2] == s2 && (scacchiera2.esisteCella(i-3, j-3) && scac[i-3][j-3] == 1 || scac[i-3][j-3] == 0)){//NOTA: if annestati per controllare una sola volta esistenza celle per i-3, i-4 ecc ecc 
+															scacFuturaClass = scacchiera2.clona();
+															scacFutura = scacFuturaClass.getScacchiera();
+															scacFuturaClass.aggiornaScacchiera(i-1, j-1, i, j, i-2, j-2, i-1, j-1);
+															m = generaStringaMossa(i-1, j-1, i, j, i-2, j-2, i-1, j-1);
+															
+															currValue = valutaMossa(scacFuturaClass, side2, depth-1, ab == Double.NEGATIVE_INFINITY ? ab: -ab);
 															if(currValue < bestValue){
 																bestValue = currValue;
 																mossa = m;
@@ -306,13 +325,15 @@ public class Client {
 															if (alfabeta > bestValue)
 																break aleg;
 															ab = bestValue;
-															}else if(scacFutura[i-2][j-2] == s1 ){//tre pedine allineate
-															if(scacFuturaClass.esisteCella(i-3, j-3)){
-																if(scacFutura[i-3][j-3] == 1){//cella vuota
-																	scacFuturaClass.aggiornaScacchiera(i, j, i-2, j-2, i-1, j-1, i-3, j-3);// da controllare
-																	m = generaStringaMossa(i, j, i-2, j-2, i-1, j-1, i-3, j-3);
-																	ab = ab == Double.NEGATIVE_INFINITY ? ab: -ab;
-																	currValue = valutaMossa(scacFuturaClass, side2, depth-1, ab);
+															}else if(scac[i-2][j-2] == s1 ){//tre pedine allineate
+															if(scacchiera2.esisteCella(i-3, j-3)){
+																if(scac[i-3][j-3] == 1){//cella vuota
+																	scacFuturaClass = scacchiera2.clona();
+																	scacFutura = scacFuturaClass.getScacchiera();
+																	scacFuturaClass.aggiornaScacchiera(i-2, j-2, i, j, i-3, j-3, i-1, j-1);
+																	m = generaStringaMossa(i-2, j-2, i, j, i-3, j-3, i-1, j-1);
+																	
+																	currValue = valutaMossa(scacFuturaClass, side2, depth-1, ab == Double.NEGATIVE_INFINITY ? ab: -ab);
 																	if(currValue < bestValue){
 																		bestValue = currValue;
 																		mossa = m;
@@ -320,12 +341,14 @@ public class Client {
 																	if (alfabeta > bestValue)
 																		break aleg;
 																	ab = bestValue;
-																}else if(scacFutura[i-3][j-3] == s2 && scacFuturaClass.esisteCella(i-4, j-4)){//c'è avversario
-																		if(scacFutura[i-4][j-4] == 1){
-																			scacFuturaClass.aggiornaScacchiera(i, j, i-2, j-2, i-1, j-1, i-3, j-3);// da controllare
-																			m = generaStringaMossa(i, j, i-2, j-2, i-1, j-1, i-3, j-3);
-																			ab = ab == Double.NEGATIVE_INFINITY ? ab: -ab;
-																			currValue = valutaMossa(scacFuturaClass, side2, depth-1, ab);
+																}else if(scac[i-3][j-3] == s2 && scacchiera2.esisteCella(i-4, j-4)){//c'è avversario
+																		if(scac[i-4][j-4] == 1){
+																			scacFuturaClass = scacchiera2.clona();
+																			scacFutura = scacFuturaClass.getScacchiera();
+																			scacFuturaClass.aggiornaScacchiera(i-2, j-2, i, j, i-3, j-3, i-1, j-1);
+																			m = generaStringaMossa(i-2, j-2, i, j, i-3, j-3, i-1, j-1);
+																			
+																			currValue = valutaMossa(scacFuturaClass, side2, depth-1, ab == Double.NEGATIVE_INFINITY ? ab: -ab);
 																			if(currValue < bestValue){
 																				bestValue = currValue;
 																				mossa = m;
@@ -333,12 +356,14 @@ public class Client {
 																			if (alfabeta > bestValue)
 																				break aleg;
 																			ab = bestValue;
-																		}else if(scacFutura[i-4][j-4] == s2){
-																				if(scacFuturaClass.esisteCella(i-5, j-5) && scacFutura[i-5][j-5] == 1){
-																					scacFuturaClass.aggiornaScacchiera(i, j, i-2, j-2, i-1, j-1, i-3, j-3);// da controllare, la pedina avversaria non viene toccata
-																					m = generaStringaMossa(i, j, i-2, j-2, i-1, j-1, i-3, j-3);
-																					ab = ab == Double.NEGATIVE_INFINITY ? ab: -ab;
-																					currValue = valutaMossa(scacFuturaClass, side2, depth-1, ab);
+																		}else if(scac[i-4][j-4] == s2){
+																				if(scacchiera2.esisteCella(i-5, j-5) && scac[i-5][j-5] == 1){
+																					scacFuturaClass = scacchiera2.clona();
+																					scacFutura = scacFuturaClass.getScacchiera();
+																					scacFuturaClass.aggiornaScacchiera(i-2, j-2, i, j, i-3, j-3, i-1, j-1);
+																					m = generaStringaMossa(i-2, j-2, i, j, i-3, j-3, i-1, j-1);
+																					
+																					currValue = valutaMossa(scacFuturaClass, side2, depth-1, ab == Double.NEGATIVE_INFINITY ? ab: -ab);
 																					if(currValue < bestValue){
 																						bestValue = currValue;
 																						mossa = m;
@@ -346,11 +371,13 @@ public class Client {
 																					if (alfabeta > bestValue)
 																						break aleg;
 																					ab = bestValue;
-																				}else if(scacFutura[i-5][j-5] == 0){
-																					scacFuturaClass.aggiornaScacchiera(i, j, i-2, j-2, i-1, j-1, i-3, j-3);// da controllare, la pedina avversaria non viene toccata
-																					m = generaStringaMossa(i, j, i-2, j-2, i-1, j-1, i-3, j-3);
-																					ab = ab == Double.NEGATIVE_INFINITY ? ab: -ab;
-																					currValue = valutaMossa(scacFuturaClass, side2, depth-1, ab);
+																				}else if(scac[i-5][j-5] == 0){
+																					scacFuturaClass = scacchiera2.clona();
+																					scacFutura = scacFuturaClass.getScacchiera();
+																					scacFuturaClass.aggiornaScacchiera(i-2, j-2, i, j, i-3, j-3, i-1, j-1);
+																					m = generaStringaMossa(i-2, j-2, i, j, i-3, j-3, i-1, j-1);
+																					
+																					currValue = valutaMossa(scacFuturaClass, side2, depth-1, ab == Double.NEGATIVE_INFINITY ? ab: -ab);
 																					if(currValue < bestValue){
 																						bestValue = currValue;
 																						mossa = m;
@@ -360,11 +387,13 @@ public class Client {
 																					ab = bestValue;
 																				}
 																		}
-																	}else if(scacFutura[i-3][j-3] == s2 && scacFutura[i-4][j-4] == 0){
-																		scacFuturaClass.aggiornaScacchiera(i, j, i-2, j-2, i-1, j-1, i-3, j-3);// da controllare
-																		m = generaStringaMossa(i, j, i-2, j-2, i-1, j-1, i-3, j-3);
-																		ab = ab == Double.NEGATIVE_INFINITY ? ab: -ab;
-																		currValue = valutaMossa(scacFuturaClass, side2, depth-1, ab);
+																	}else if(scac[i-3][j-3] == s2 && scac[i-4][j-4] == 0){
+																		scacFuturaClass = scacchiera2.clona();
+																		scacFutura = scacFuturaClass.getScacchiera();
+																		scacFuturaClass.aggiornaScacchiera(i-2, j-2, i, j, i-3, j-3, i-1, j-1);
+																		m = generaStringaMossa(i-2, j-2, i, j, i-3, j-3, i-1, j-1);
+																		
+																		currValue = valutaMossa(scacFuturaClass, side2, depth-1, ab == Double.NEGATIVE_INFINITY ? ab: -ab);
 																		if(currValue < bestValue){
 																			bestValue = currValue;
 																			mossa = m;
@@ -381,12 +410,13 @@ public class Client {
 									
 								}else if(direzioni[k]==3){
 									//OVEST
-									if(scacFuturaClass.esisteCella(i, j-1)){//FIXME
-										if(scacFutura[i][j-1] == 1){//una pedina
+									if(scacchiera2.esisteCella(i, j-1)){//FIXME
+										if(scac[i][j-1] == 1){//una pedina
+											scacFuturaClass = scacchiera2.clona();
+											scacFutura = scacFuturaClass.getScacchiera();
 											scacFuturaClass.aggiornaScacchiera(i, j, i, j, i, j-1, i, j-1);
 											m = generaStringaMossa(i, j, i, j, i, j-1, i, j-1);
-											ab = ab == Double.NEGATIVE_INFINITY ? ab: -ab;
-											currValue = valutaMossa(scacFuturaClass, side2, depth-1, ab);
+											currValue = valutaMossa(scacFuturaClass, side2, depth-1, ab == Double.NEGATIVE_INFINITY ? ab: -ab);
 											if(currValue < bestValue){
 												bestValue = currValue;
 												mossa = m;
@@ -394,13 +424,15 @@ public class Client {
 											if (alfabeta > bestValue)
 												break aleg;
 											ab = bestValue;
-										}else if(scacFutura[i][j-1] == s1){// due pedine allineate
-												if(scacFuturaClass.esisteCella(i, j-2)){
-													if(scacFutura[i][j-2] == 1){// la cella controllata è vuota quindi mi sposto li
-														scacFuturaClass.aggiornaScacchiera(i, j, i, j-1, i, j-1, i, j-2);// da controllare
-														m = generaStringaMossa(i, j, i, j-1, i, j-1, i, j-2);
-														ab = ab == Double.NEGATIVE_INFINITY ? ab: -ab;
-														currValue = valutaMossa(scacFuturaClass, side2, depth-1, ab);
+										}else if(scac[i][j-1] == s1){// due pedine allineate
+												if(scacchiera2.esisteCella(i, j-2)){
+													if(scac[i][j-2] == 1){// la cella controllata è vuota
+														scacFuturaClass = scacchiera2.clona();
+														scacFutura = scacFuturaClass.getScacchiera();
+														scacFuturaClass.aggiornaScacchiera(i, j-1, i, j, i, j-2, i, j-1);
+														m = generaStringaMossa(i, j-1, i, j, i, j-2, i, j-1);
+														
+														currValue = valutaMossa(scacFuturaClass, side2, depth-1, ab == Double.NEGATIVE_INFINITY ? ab: -ab);
 														if(currValue < bestValue){
 															bestValue = currValue;
 															mossa = m;
@@ -408,11 +440,13 @@ public class Client {
 														if (alfabeta > bestValue)
 															break aleg;
 														ab = bestValue;
-													}else if(scacFutura[i][j-2] == s2 && (scacFuturaClass.esisteCella(i, j-3) && scacFutura[i][j-3] == 1 || scacFutura[i][j-3] == 0)){//NOTA: if annestati per controllare una sola volta esistenza celle per i-3, i-4 ecc ecc 
-															scacFuturaClass.aggiornaScacchiera(i, j, i, j-1, i, j-1, i, j-2);// da controllare, la pedina avversaria non viene toccata
-															m = generaStringaMossa(i, j, i, j-1, i, j-1, i, j-2);
-															ab = ab == Double.NEGATIVE_INFINITY ? ab: -ab;
-															currValue = valutaMossa(scacFuturaClass, side2, depth-1, ab);
+													}else if(scac[i][j-2] == s2 && (scacchiera2.esisteCella(i, j-3) && scac[i][j-3] == 1 || scac[i][j-3] == 0)){
+															scacFuturaClass = scacchiera2.clona();
+															scacFutura = scacFuturaClass.getScacchiera();
+															scacFuturaClass.aggiornaScacchiera(i, j-1, i, j, i, j-2, i, j-1);
+															m = generaStringaMossa(i, j-1, i, j, i, j-2, i, j-1);
+															
+															currValue = valutaMossa(scacFuturaClass, side2, depth-1, ab == Double.NEGATIVE_INFINITY ? ab: -ab);
 															if(currValue < bestValue){
 																bestValue = currValue;
 																mossa = m;
@@ -420,13 +454,15 @@ public class Client {
 															if (alfabeta > bestValue)
 																break aleg;
 															ab = bestValue;
-															}else if(scacFutura[i][j-2] == s1 ){//tre pedine allineate
-															if(scacFuturaClass.esisteCella(i, j-3)){
-																if(scacFutura[i][j-3] == 1){//cella vuota
-																	scacFuturaClass.aggiornaScacchiera(i, j, i, j-2, i, j-1, i, j-3);// da controllare
-																	m = generaStringaMossa(i, j, i, j-2, i, j-1, i, j-3);
-																	ab = ab == Double.NEGATIVE_INFINITY ? ab: -ab;
-																	currValue = valutaMossa(scacFuturaClass, side2, depth-1, ab);
+															}else if(scac[i][j-2] == s1 ){//tre pedine allineate
+															if(scacchiera2.esisteCella(i, j-3)){
+																if(scac[i][j-3] == 1){//cella vuota
+																	scacFuturaClass = scacchiera2.clona();
+																	scacFutura = scacFuturaClass.getScacchiera();
+																	scacFuturaClass.aggiornaScacchiera(i, j-2, i, j, i, j-3, i, j-1);
+																	m = generaStringaMossa(i, j-2, i, j, i, j-3, i, j-1);
+																	
+																	currValue = valutaMossa(scacFuturaClass, side2, depth-1, ab == Double.NEGATIVE_INFINITY ? ab: -ab);
 																	if(currValue < bestValue){
 																		bestValue = currValue;
 																		mossa = m;
@@ -434,12 +470,14 @@ public class Client {
 																	if (alfabeta > bestValue)
 																		break aleg;
 																	ab = bestValue;
-																}else if(scacFutura[i][j-3] == s2 && scacFuturaClass.esisteCella(i, j-4)){//c'è avversario
-																		if(scacFutura[i][j-4] == 1){
-																			scacFuturaClass.aggiornaScacchiera(i, j, i, j-2, i, j-1, i, j-3);// da controllare
-																			m = generaStringaMossa(i, j, i, j-2, i, j-1, i, j-3);
-																			ab = ab == Double.NEGATIVE_INFINITY ? ab: -ab;
-																			currValue = valutaMossa(scacFuturaClass, side2, depth-1, ab);
+																}else if(scac[i][j-3] == s2 && scacchiera2.esisteCella(i, j-4)){//c'è avversario
+																		if(scac[i][j-4] == 1){
+																			scacFuturaClass = scacchiera2.clona();
+																			scacFutura = scacFuturaClass.getScacchiera();
+																			scacFuturaClass.aggiornaScacchiera(i, j-2, i, j, i, j-3, i, j-1);// da controllare
+																			m = generaStringaMossa(i, j-2, i, j, i, j-3, i, j-1);
+																			
+																			currValue = valutaMossa(scacFuturaClass, side2, depth-1, ab == Double.NEGATIVE_INFINITY ? ab: -ab);
 																			if(currValue < bestValue){
 																				bestValue = currValue;
 																				mossa = m;
@@ -447,12 +485,14 @@ public class Client {
 																			if (alfabeta > bestValue)
 																				break aleg;
 																			ab = bestValue;
-																		}else if(scacFutura[i][j-4] == s2){
-																				if(scacFuturaClass.esisteCella(i, j-5) && scacFutura[i][j-5] == 1){
-																					scacFuturaClass.aggiornaScacchiera(i, j, i, j-2, i, j-1, i, j-3);// da controllare, la pedina avversaria non viene toccata
-																					m = generaStringaMossa(i, j, i, j-2, i, j-1, i, j-3);
-																					ab = ab == Double.NEGATIVE_INFINITY ? ab: -ab;
-																					currValue = valutaMossa(scacFuturaClass, side2, depth-1, ab);
+																		}else if(scac[i][j-4] == s2){
+																				if(scacchiera2.esisteCella(i, j-5) && scac[i][j-5] == 1){
+																					scacFuturaClass = scacchiera2.clona();
+																					scacFutura = scacFuturaClass.getScacchiera();
+																					scacFuturaClass.aggiornaScacchiera(i, j-2, i, j, i, j-3, i, j-1);// da controllare, la pedina avversaria non viene toccata
+																					m = generaStringaMossa(i, j-2, i, j, i, j-3, i, j-1);
+																					
+																					currValue = valutaMossa(scacFuturaClass, side2, depth-1, ab == Double.NEGATIVE_INFINITY ? ab: -ab);
 																					if(currValue < bestValue){
 																						bestValue = currValue;
 																						mossa = m;
@@ -460,11 +500,13 @@ public class Client {
 																					if (alfabeta > bestValue)
 																						break aleg;
 																					ab = bestValue;
-																				}else if(scacFutura[i][j-5] == 0){
-																					scacFuturaClass.aggiornaScacchiera(i, j, i, j-2, i, j-1, i, j-3);// da controllare, la pedina avversaria non viene toccata
-																					m = generaStringaMossa(i, j, i, j-2, i, j-1, i, j-3);
-																					ab = ab == Double.NEGATIVE_INFINITY ? ab: -ab;
-																					currValue = valutaMossa(scacFuturaClass, side2, depth-1, ab);
+																				}else if(scac[i][j-5] == 0){
+																					scacFuturaClass = scacchiera2.clona();
+																					scacFutura = scacFuturaClass.getScacchiera();
+																					scacFuturaClass.aggiornaScacchiera(i, j-2, i, j, i, j-3, i, j-1);// da controllare, la pedina avversaria non viene toccata
+																					m = generaStringaMossa(i, j-2, i, j, i, j-3, i, j-1);
+																					
+																					currValue = valutaMossa(scacFuturaClass, side2, depth-1, ab == Double.NEGATIVE_INFINITY ? ab: -ab);
 																					if(currValue < bestValue){
 																						bestValue = currValue;
 																						mossa = m;
@@ -474,11 +516,13 @@ public class Client {
 																					ab = bestValue;
 																				}
 																		}
-																	}else if(scacFutura[i][j-3] == s2 && scacFutura[i][j-4] == 0){
-																		scacFuturaClass.aggiornaScacchiera(i, j, i, j-2, i, j-1, i, j-3);// da controllare
-																		m = generaStringaMossa(i, j, i, j-2, i, j-1, i, j-3);
-																		ab = ab == Double.NEGATIVE_INFINITY ? ab: -ab;
-																		currValue = valutaMossa(scacFuturaClass, side2, depth-1, ab);
+																	}else if(scac[i][j-3] == s2 && scac[i][j-4] == 0){
+																		scacFuturaClass = scacchiera2.clona();
+																		scacFutura = scacFuturaClass.getScacchiera();
+																		scacFuturaClass.aggiornaScacchiera(i, j-2, i, j, i, j-3, i, j-1);// da controllare
+																		m = generaStringaMossa(i, j-2, i, j, i, j-3, i, j-1);
+																		
+																		currValue = valutaMossa(scacFuturaClass, side2, depth-1, ab == Double.NEGATIVE_INFINITY ? ab: -ab);
 																		if(currValue < bestValue){
 																			bestValue = currValue;
 																			mossa = m;
@@ -495,12 +539,14 @@ public class Client {
 									
 								}else if(direzioni[k]==4){
 									//SUD
-									if(scacFuturaClass.esisteCella(i+1, j)){//FIXME
-										if(scacFutura[i+1][j] == 1){//una pedina
+									if(scacchiera2.esisteCella(i+1, j)){//FIXME
+										if(scac[i+1][j] == 1){//una pedina
+											scacFuturaClass = scacchiera2.clona();
+											scacFutura = scacFuturaClass.getScacchiera();
 											scacFuturaClass.aggiornaScacchiera(i, j, i, j, i+1, j, i+1, j);
 											m = generaStringaMossa(i, j, i, j, i+1, j, i+1, j);
-											ab = ab == Double.NEGATIVE_INFINITY ? ab: -ab;
-											currValue = valutaMossa(scacFuturaClass, side2, depth-1, ab);
+											
+											currValue = valutaMossa(scacFuturaClass, side2, depth-1, ab == Double.NEGATIVE_INFINITY ? ab: -ab);
 											if(currValue < bestValue){
 												bestValue = currValue;
 												mossa = m;
@@ -508,13 +554,15 @@ public class Client {
 											if (alfabeta > bestValue)
 												break aleg;
 											ab = bestValue;
-										}else if(scacFutura[i+1][j] == s1){// due pedine allineate
-												if(scacFuturaClass.esisteCella(i+2, j)){
-													if(scacFutura[i+2][j] == 1){// la cella controllata è vuota quindi mi sposto li
+										}else if(scac[i+1][j] == s1){// due pedine allineate
+												if(scacchiera2.esisteCella(i+2, j)){
+													if(scac[i+2][j] == 1){// la cella controllata è vuota quindi mi sposto li
+														scacFuturaClass = scacchiera2.clona();
+														scacFutura = scacFuturaClass.getScacchiera();
 														scacFuturaClass.aggiornaScacchiera(i, j, i+1, j, i+1, j, i+2, j);// da controllare
 														m = generaStringaMossa(i, j, i+1, j, i+1, j, i+2, j);
-														ab = ab == Double.NEGATIVE_INFINITY ? ab: -ab;
-														currValue = valutaMossa(scacFuturaClass, side2, depth-1, ab);
+														
+														currValue = valutaMossa(scacFuturaClass, side2, depth-1, ab == Double.NEGATIVE_INFINITY ? ab: -ab);
 														if(currValue < bestValue){
 															bestValue = currValue;
 															mossa = m;
@@ -522,11 +570,13 @@ public class Client {
 														if (alfabeta > bestValue)
 															break aleg;
 														ab = bestValue;
-													}else if(scacFutura[i+2][j] == s2 && (scacFuturaClass.esisteCella(i+3, j) && scacFutura[i+3][j] == 1 || scacFutura[i+3][j] == 0)){//NOTA: if annestati per controllare una sola volta esistenza celle per i-3, i-4 ecc ecc 
+													}else if(scac[i+2][j] == s2 && (scacchiera2.esisteCella(i+3, j) && scac[i+3][j] == 1 || scac[i+3][j] == 0)){//NOTA: if annestati per controllare una sola volta esistenza celle per i-3, i-4 ecc ecc 
+															scacFuturaClass = scacchiera2.clona();
+															scacFutura = scacFuturaClass.getScacchiera();
 															scacFuturaClass.aggiornaScacchiera(i, j, i+1, j, i+1, j, i+2, j);// da controllare, la pedina avversaria non viene toccata
 															m = generaStringaMossa(i, j, i+1, j, i+1, j, i+2, j);
-															ab = ab == Double.NEGATIVE_INFINITY ? ab: -ab;
-															currValue = valutaMossa(scacFuturaClass, side2, depth-1, ab);
+															
+															currValue = valutaMossa(scacFuturaClass, side2, depth-1, ab == Double.NEGATIVE_INFINITY ? ab: -ab);
 															if(currValue < bestValue){
 																bestValue = currValue;
 																mossa = m;
@@ -534,13 +584,15 @@ public class Client {
 															if (alfabeta > bestValue)
 																break aleg;
 															ab = bestValue;
-															}else if(scacFutura[i+2][j] == s1 ){//tre pedine allineate
-															if(scacFuturaClass.esisteCella(i+3, j)){
-																if(scacFutura[i+3][j] == 1){//cella vuota
+															}else if(scac[i+2][j] == s1 ){//tre pedine allineate
+															if(scacchiera2.esisteCella(i+3, j)){
+																if(scac[i+3][j] == 1){//cella vuota
+																	scacFuturaClass = scacchiera2.clona();
+																	scacFutura = scacFuturaClass.getScacchiera();
 																	scacFuturaClass.aggiornaScacchiera(i, j, i+2, j, i+1, j, i+3, j);// da controllare
 																	m = generaStringaMossa(i, j, i+2, j, i+1, j, i+3, j);
-																	ab = ab == Double.NEGATIVE_INFINITY ? ab: -ab;
-																	currValue = valutaMossa(scacFuturaClass, side2, depth-1, ab);
+																	
+																	currValue = valutaMossa(scacFuturaClass, side2, depth-1, ab == Double.NEGATIVE_INFINITY ? ab: -ab);
 																	if(currValue < bestValue){
 																		bestValue = currValue;
 																		mossa = m;
@@ -548,12 +600,14 @@ public class Client {
 																	if (alfabeta > bestValue)
 																		break aleg;
 																	ab = bestValue;
-																}else if(scacFutura[i+3][j] == s2 && scacFuturaClass.esisteCella(i+4, j)){//c'è avversario
-																		if(scacFutura[i+4][j] == 1){
+																}else if(scac[i+3][j] == s2 && scacchiera2.esisteCella(i+4, j)){//c'è avversario
+																		if(scac[i+4][j] == 1){
+																			scacFuturaClass = scacchiera2.clona();
+																			scacFutura = scacFuturaClass.getScacchiera();
 																			scacFuturaClass.aggiornaScacchiera(i, j, i+2, j, i+1, j, i+3, j);// da controllare
 																			m = generaStringaMossa(i, j, i+2, j, i+1, j, i+3, j);
-																			ab = ab == Double.NEGATIVE_INFINITY ? ab: -ab;
-																			currValue = valutaMossa(scacFuturaClass, side2, depth-1, ab);
+																			
+																			currValue = valutaMossa(scacFuturaClass, side2, depth-1, ab == Double.NEGATIVE_INFINITY ? ab: -ab);
 																			if(currValue < bestValue){
 																				bestValue = currValue;
 																				mossa = m;
@@ -561,12 +615,14 @@ public class Client {
 																			if (alfabeta > bestValue)
 																				break aleg;
 																			ab = bestValue;
-																		}else if(scacFutura[i+4][j] == s2){
-																				if(scacFuturaClass.esisteCella(i+5, j) && scacFutura[i+5][j] == 1){
+																		}else if(scac[i+4][j] == s2){
+																				if(scacchiera2.esisteCella(i+5, j) && scac[i+5][j] == 1){
+																					scacFuturaClass = scacchiera2.clona();
+																					scacFutura = scacFuturaClass.getScacchiera();
 																					scacFuturaClass.aggiornaScacchiera(i, j, i+2, j, i+1, j, i+3, j);// da controllare, la pedina avversaria non viene toccata
 																					m = generaStringaMossa(i, j, i+2, j, i+1, j, i+3, j);
-																					ab = ab == Double.NEGATIVE_INFINITY ? ab: -ab;
-																					currValue = valutaMossa(scacFuturaClass, side2, depth-1, ab);
+																					
+																					currValue = valutaMossa(scacFuturaClass, side2, depth-1, ab == Double.NEGATIVE_INFINITY ? ab: -ab);
 																					if(currValue < bestValue){
 																						bestValue = currValue;
 																						mossa = m;
@@ -574,11 +630,13 @@ public class Client {
 																					if (alfabeta > bestValue)
 																						break aleg;
 																					ab = bestValue;
-																				}else if(scacFutura[i+5][j] == 0){
+																				}else if(scac[i+5][j] == 0){
+																					scacFuturaClass = scacchiera2.clona();
+																					scacFutura = scacFuturaClass.getScacchiera();
 																					scacFuturaClass.aggiornaScacchiera(i, j, i+2, j, i+1, j, i+3, j);// da controllare, la pedina avversaria non viene toccata
 																					m = generaStringaMossa(i, j, i+2, j, i+1, j, i+3, j);
-																					ab = ab == Double.NEGATIVE_INFINITY ? ab: -ab;
-																					currValue = valutaMossa(scacFuturaClass, side2, depth-1, ab);
+																					
+																					currValue = valutaMossa(scacFuturaClass, side2, depth-1, ab == Double.NEGATIVE_INFINITY ? ab: -ab);
 																					if(currValue < bestValue){
 																						bestValue = currValue;
 																						mossa = m;
@@ -588,11 +646,13 @@ public class Client {
 																					ab = bestValue;
 																				}
 																		}
-																	}else if(scacFutura[i+3][j] == s2 && scacFutura[i+4][j] == 0){
+																	}else if(scac[i+3][j] == s2 && scac[i+4][j] == 0){
+																		scacFuturaClass = scacchiera2.clona();
+																		scacFutura = scacFuturaClass.getScacchiera();
 																		scacFuturaClass.aggiornaScacchiera(i, j, i+2, j, i+1, j, i+3, j);// da controllare
 																		m = generaStringaMossa(i, j, i+2, j, i+1, j, i+3, j);
-																		ab = ab == Double.NEGATIVE_INFINITY ? ab: -ab;
-																		currValue = valutaMossa(scacFuturaClass, side2, depth-1, ab);
+																		
+																		currValue = valutaMossa(scacFuturaClass, side2, depth-1, ab == Double.NEGATIVE_INFINITY ? ab: -ab);
 																		if(currValue < bestValue){
 																			bestValue = currValue;
 																			mossa = m;
@@ -608,12 +668,14 @@ public class Client {
 									}	
 								}else if(direzioni[k]==5){
 									//SUD-EST
-									if(scacFuturaClass.esisteCella(i+1, j+1)){//FIXME
-										if(scacFutura[i+1][j+1] == 1){//una pedina
+									if(scacchiera2.esisteCella(i+1, j+1)){//FIXME
+										if(scac[i+1][j+1] == 1){//una pedina
+											scacFuturaClass = scacchiera2.clona();
+											scacFutura = scacFuturaClass.getScacchiera();
 											scacFuturaClass.aggiornaScacchiera(i, j, i, j, i+1, j+1, i+1, j+1);
 											m = generaStringaMossa(i, j, i, j, i+1, j+1, i+1, j+1);
-											ab = ab == Double.NEGATIVE_INFINITY ? ab: -ab;
-											currValue = valutaMossa(scacFuturaClass, side2, depth-1, ab);
+											
+											currValue = valutaMossa(scacFuturaClass, side2, depth-1, ab == Double.NEGATIVE_INFINITY ? ab: -ab);
 											if(currValue < bestValue){
 												bestValue = currValue;
 												mossa = m;
@@ -621,13 +683,15 @@ public class Client {
 											if (alfabeta > bestValue)
 												break aleg;
 											ab = bestValue;
-										}else if(scacFutura[i+1][j+1] == s1){// due pedine allineate
-												if(scacFuturaClass.esisteCella(i+2, j+2)){
-													if(scacFutura[i+2][j+2] == 1){// la cella controllata è vuota quindi mi sposto li
+										}else if(scac[i+1][j+1] == s1){// due pedine allineate
+												if(scacchiera2.esisteCella(i+2, j+2)){
+													scacFuturaClass = scacchiera2.clona();
+													scacFutura = scacFuturaClass.getScacchiera();
+													if(scac[i+2][j+2] == 1){// la cella controllata è vuota quindi mi sposto li
 														scacFuturaClass.aggiornaScacchiera(i, j, i+1, j+1, i+1, j+1, i+2, j+2);// da controllare
 														m = generaStringaMossa(i, j, i+1, j+1, i+1, j+1, i+2, j+2);
-														ab = ab == Double.NEGATIVE_INFINITY ? ab: -ab;
-														currValue = valutaMossa(scacFuturaClass, side2, depth-1, ab);
+														
+														currValue = valutaMossa(scacFuturaClass, side2, depth-1, ab == Double.NEGATIVE_INFINITY ? ab: -ab);
 														if(currValue < bestValue){
 															bestValue = currValue;
 															mossa = m;
@@ -635,11 +699,13 @@ public class Client {
 														if (alfabeta > bestValue)
 															break aleg;
 														ab = bestValue;
-													}else if(scacFutura[i+2][j+2] == s2 && (scacFuturaClass.esisteCella(i+3, j+3) && scacFutura[i+3][j+3] == 1 || scacFutura[i+3][j+3] == 0)){//NOTA: if annestati per controllare una sola volta esistenza celle per i-3, i-4 ecc ecc 
+													}else if(scac[i+2][j+2] == s2 && (scacchiera2.esisteCella(i+3, j+3) && scac[i+3][j+3] == 1 || scac[i+3][j+3] == 0)){//NOTA: if annestati per controllare una sola volta esistenza celle per i-3, i-4 ecc ecc 
+															scacFuturaClass = scacchiera2.clona();
+															scacFutura = scacFuturaClass.getScacchiera();
 															scacFuturaClass.aggiornaScacchiera(i, j, i+1, j+1, i+1, j+1, i+2, j+2);// da controllare, la pedina avversaria non viene toccata
 															m = generaStringaMossa(i, j, i+1, j+1, i+1, j+1, i+2, j+2);
-															ab = ab == Double.NEGATIVE_INFINITY ? ab: -ab;
-															currValue = valutaMossa(scacFuturaClass, side2, depth-1, ab);
+															
+															currValue = valutaMossa(scacFuturaClass, side2, depth-1, ab == Double.NEGATIVE_INFINITY ? ab: -ab);
 															if(currValue < bestValue){
 																bestValue = currValue;
 																mossa = m;
@@ -647,13 +713,15 @@ public class Client {
 															if (alfabeta > bestValue)
 																break aleg;
 															ab = bestValue;
-															}else if(scacFutura[i+2][j+2] == 1 ){//tre pedine allineate
-															if(scacFuturaClass.esisteCella(i+3, j+3)){
-																if(scacFutura[i+3][j+3] == s1){//cella vuota
+															}else if(scac[i+2][j+2] == 1 ){//tre pedine allineate
+															if(scacchiera2.esisteCella(i+3, j+3)){
+																if(scac[i+3][j+3] == s1){//cella vuota
+																	scacFuturaClass = scacchiera2.clona();
+																	scacFutura = scacFuturaClass.getScacchiera();
 																	scacFuturaClass.aggiornaScacchiera(i, j, i+2, j+2, i+1, j+1, i+3, j+3);// da controllare
 																	m = generaStringaMossa(i, j, i+2, j+2, i+1, j+1, i+3, j+3);
-																	ab = ab == Double.NEGATIVE_INFINITY ? ab: -ab;
-																	currValue = valutaMossa(scacFuturaClass, side2, depth-1, ab);
+																	
+																	currValue = valutaMossa(scacFuturaClass, side2, depth-1, ab == Double.NEGATIVE_INFINITY ? ab: -ab);
 																	if(currValue < bestValue){
 																		bestValue = currValue;
 																		mossa = m;
@@ -661,12 +729,14 @@ public class Client {
 																	if (alfabeta > bestValue)
 																		break aleg;
 																	ab = bestValue;
-																}else if(scacFutura[i+3][j+3] == s2 && scacFuturaClass.esisteCella(i+4, j+4)){//c'è avversario
+																}else if(scac[i+3][j+3] == s2 && scacchiera2.esisteCella(i+4, j+4)){//c'è avversario
 																		if(scacFutura[i+4][j+4] == 1){
+																			scacFuturaClass = scacchiera2.clona();
+																			scacFutura = scacFuturaClass.getScacchiera();
 																			scacFuturaClass.aggiornaScacchiera(i, j, i+2, j+2, i+1, j+1, i+3, j+3);// da controllare
 																			m = generaStringaMossa(i, j, i+2, j+2, i+1, j+1, i+3, j+3);
-																			ab = ab == Double.NEGATIVE_INFINITY ? ab: -ab;
-																			currValue = valutaMossa(scacFuturaClass, side2, depth-1, ab);
+																			
+																			currValue = valutaMossa(scacFuturaClass, side2, depth-1, ab == Double.NEGATIVE_INFINITY ? ab: -ab);
 																			if(currValue < bestValue){
 																				bestValue = currValue;
 																				mossa = m;
@@ -674,12 +744,14 @@ public class Client {
 																			if (alfabeta > bestValue)
 																				break aleg;
 																			ab = bestValue;
-																		}else if(scacFutura[i+4][j+4] == s2){
-																				if(scacFuturaClass.esisteCella(i+5, j+5) && scacFutura[i+5][j+5] == 1){
+																		}else if(scac[i+4][j+4] == s2){
+																				if(scacchiera2.esisteCella(i+5, j+5) && scac[i+5][j+5] == 1){
+																					scacFuturaClass = scacchiera2.clona();
+																					scacFutura = scacFuturaClass.getScacchiera();
 																					scacFuturaClass.aggiornaScacchiera(i, j, i+2, j+2, i+1, j+1, i+3, j+3);// da controllare, la pedina avversaria non viene toccata
 																					m = generaStringaMossa(i, j, i+2, j+2, i+1, j+1, i+3, j+3);
-																					ab = ab == Double.NEGATIVE_INFINITY ? ab: -ab;
-																					currValue = valutaMossa(scacFuturaClass, side2, depth-1, ab);
+																					
+																					currValue = valutaMossa(scacFuturaClass, side2, depth-1, ab == Double.NEGATIVE_INFINITY ? ab: -ab);
 																					if(currValue < bestValue){
 																						bestValue = currValue;
 																						mossa = m;
@@ -687,11 +759,13 @@ public class Client {
 																					if (alfabeta > bestValue)
 																						break aleg;
 																					ab = bestValue;
-																				}else if(scacFutura[i+5][j+5] == 0){
+																				}else if(scac[i+5][j+5] == 0){
+																					scacFuturaClass = scacchiera2.clona();
+																					scacFutura = scacFuturaClass.getScacchiera();
 																					scacFuturaClass.aggiornaScacchiera(i, j, i+2, j+2, i+1, j+1, i+3, j+3);// da controllare, la pedina avversaria non viene toccata
 																					m = generaStringaMossa(i, j, i+2, j+2, i+1, j+1, i+3, j+3);
-																					ab = ab == Double.NEGATIVE_INFINITY ? ab: -ab;
-																					currValue = valutaMossa(scacFuturaClass, side2, depth-1, ab);
+																					
+																					currValue = valutaMossa(scacFuturaClass, side2, depth-1, ab == Double.NEGATIVE_INFINITY ? ab: -ab);
 																					if(currValue < bestValue){
 																						bestValue = currValue;
 																						mossa = m;
@@ -701,11 +775,13 @@ public class Client {
 																					ab = bestValue;
 																				}
 																		}
-																	}else if(scacFutura[i+3][j+3] == s2 && scacFutura[i+4][j+4] == 0){
+																	}else if(scac[i+3][j+3] == s2 && scac[i+4][j+4] == 0){
+																		scacFuturaClass = scacchiera2.clona();
+																		scacFutura = scacFuturaClass.getScacchiera();
 																		scacFuturaClass.aggiornaScacchiera(i, j, i+2, j+2, i+1, j+1, i+3, j+3);// da controllare
 																		m = generaStringaMossa(i, j, i+2, j+2, i+1, j+1, i+3, j+3);
-																		ab = ab == Double.NEGATIVE_INFINITY ? ab: -ab;
-																		currValue = valutaMossa(scacFuturaClass, side2, depth-1, ab);
+																		
+																		currValue = valutaMossa(scacFuturaClass, side2, depth-1, ab == Double.NEGATIVE_INFINITY ? ab: -ab);
 																		if(currValue < bestValue){
 																			bestValue = currValue;
 																			mossa = m;
@@ -721,12 +797,14 @@ public class Client {
 									}
 								}else{
 									//EST
-									if(scacFuturaClass.esisteCella(i, j+1)){//FIXME
-										if(scacFutura[i][j+1] == 1){//una pedina
+									if(scacchiera2.esisteCella(i, j+1)){//FIXME
+										if(scac[i][j+1] == 1){//una pedina
+											scacFuturaClass = scacchiera2.clona();
+											scacFutura = scacFuturaClass.getScacchiera();
 											scacFuturaClass.aggiornaScacchiera(i, j, i, j, i, j+1, i, j+1);
 											m = generaStringaMossa(i, j, i, j, i, j+1, i, j+1);
-											ab = ab == Double.NEGATIVE_INFINITY ? ab: -ab;
-											currValue = valutaMossa(scacFuturaClass, side2, depth-1, ab);
+											
+											currValue = valutaMossa(scacFuturaClass, side2, depth-1, ab == Double.NEGATIVE_INFINITY ? ab: -ab);
 											if(currValue < bestValue){
 												bestValue = currValue;
 												mossa = m;
@@ -734,13 +812,15 @@ public class Client {
 											if (alfabeta > bestValue)
 												break aleg;
 											ab = bestValue;
-										}else if(scacFutura[i][j+1] == s1){// due pedine allineate
-												if(scacFuturaClass.esisteCella(i, j+2)){
-													if(scacFutura[i][j+2] == 1){// la cella controllata è vuota quindi mi sposto li
+										}else if(scac[i][j+1] == s1){// due pedine allineate
+												if(scacchiera2.esisteCella(i, j+2)){
+													if(scac[i][j+2] == 1){// la cella controllata è vuota quindi mi sposto li
+														scacFuturaClass = scacchiera2.clona();
+														scacFutura = scacFuturaClass.getScacchiera();
 														scacFuturaClass.aggiornaScacchiera(i, j, i, j+1, i, j+1, i, j+2);// da controllare
 														m = generaStringaMossa(i, j, i, j+1, i, j+1, i, j+2);
-														ab = ab == Double.NEGATIVE_INFINITY ? ab: -ab;
-														currValue = valutaMossa(scacFuturaClass, side2, depth-1, ab);
+														
+														currValue = valutaMossa(scacFuturaClass, side2, depth-1, ab == Double.NEGATIVE_INFINITY ? ab: -ab);
 														if(currValue < bestValue){
 															bestValue = currValue;
 															mossa = m;
@@ -748,11 +828,13 @@ public class Client {
 														if (alfabeta > bestValue)
 															break aleg;
 														ab = bestValue;
-													}else if(scacFutura[i][j+2] == s2 && (scacFuturaClass.esisteCella(i, j+3) && scacFutura[i][j+3] == 1 || scacFutura[i][j+3] == 0)){//NOTA: if annestati per controllare una sola volta esistenza celle per i-3, i-4 ecc ecc 
+													}else if(scac[i][j+2] == s2 && (scacchiera2.esisteCella(i, j+3) && scac[i][j+3] == 1 || scac[i][j+3] == 0)){//NOTA: if annestati per controllare una sola volta esistenza celle per i-3, i-4 ecc ecc 
+															scacFuturaClass = scacchiera2.clona();
+															scacFutura = scacFuturaClass.getScacchiera();
 															scacFuturaClass.aggiornaScacchiera(i, j, i, j+1, i, j+1, i, j+2);// da controllare, la pedina avversaria non viene toccata
 															m = generaStringaMossa(i, j, i, j+1, i, j+1, i, j+2);
-															ab = ab == Double.NEGATIVE_INFINITY ? ab: -ab;
-															currValue = valutaMossa(scacFuturaClass, side2, depth-1, ab);
+															
+															currValue = valutaMossa(scacFuturaClass, side2, depth-1, ab == Double.NEGATIVE_INFINITY ? ab: -ab);
 															if(currValue < bestValue){
 																bestValue = currValue;
 																mossa = m;
@@ -760,13 +842,15 @@ public class Client {
 															if (alfabeta > bestValue)
 																break aleg;
 															ab = bestValue;
-															}else if(scacFutura[i][j+2] == 1 ){//tre pedine allineate
-															if(scacFuturaClass.esisteCella(i, j+3)){
-																if(scacFutura[i][j-3] == s1){//cella vuota
+															}else if(scac[i][j+2] == 1 ){//tre pedine allineate
+															if(scacchiera2.esisteCella(i, j+3)){
+																if(scac[i][j-3] == s1){//cella vuota
+																	scacFuturaClass = scacchiera2.clona();
+																	scacFutura = scacFuturaClass.getScacchiera();
 																	scacFuturaClass.aggiornaScacchiera(i, j, i, j+2, i, j+1, i, j+3);// da controllare
 																	m = generaStringaMossa(i, j, i, j+2, i, j+1, i, j+3);
-																	ab = ab == Double.NEGATIVE_INFINITY ? ab: -ab;
-																	currValue = valutaMossa(scacFuturaClass, side2, depth-1, ab);
+																	
+																	currValue = valutaMossa(scacFuturaClass, side2, depth-1, ab == Double.NEGATIVE_INFINITY ? ab: -ab);
 																	if(currValue < bestValue){
 																		bestValue = currValue;
 																		mossa = m;
@@ -774,12 +858,14 @@ public class Client {
 																	if (alfabeta > bestValue)
 																		break aleg;
 																	ab = bestValue;
-																}else if(scacFutura[i][j+3] == s2 && scacFuturaClass.esisteCella(i, j+4)){//c'è avversario
-																		if(scacFutura[i][j+4] == 1){
+																}else if(scac[i][j+3] == s2 && scacchiera2.esisteCella(i, j+4)){//c'è avversario
+																		if(scac[i][j+4] == 1){
+																			scacFuturaClass = scacchiera2.clona();
+																			scacFutura = scacFuturaClass.getScacchiera();
 																			scacFuturaClass.aggiornaScacchiera(i, j, i, j+2, i, j+1, i, j+3);// da controllare
 																			m = generaStringaMossa(i, j, i, j+2, i, j+1, i, j+3);
-																			ab = ab == Double.NEGATIVE_INFINITY ? ab: -ab;
-																			currValue = valutaMossa(scacFuturaClass, side2, depth-1, ab);
+																			
+																			currValue = valutaMossa(scacFuturaClass, side2, depth-1, ab == Double.NEGATIVE_INFINITY ? ab: -ab);
 																			if(currValue < bestValue){
 																				bestValue = currValue;
 																				mossa = m;
@@ -787,12 +873,14 @@ public class Client {
 																			if (alfabeta > bestValue)
 																				break aleg;
 																			ab = bestValue;
-																		}else if(scacFutura[i][j+4] == s2){
-																				if(scacFuturaClass.esisteCella(i, j+5) && scacFutura[i][j+5] == 1){
+																		}else if(scac[i][j+4] == s2){
+																				if(scacchiera2.esisteCella(i, j+5) && scac[i][j+5] == 1){
+																					scacFuturaClass = scacchiera2.clona();
+																					scacFutura = scacFuturaClass.getScacchiera();
 																					scacFuturaClass.aggiornaScacchiera(i, j, i, j+2, i, j+1, i, j+3);// da controllare, la pedina avversaria non viene toccata
 																					m = generaStringaMossa(i, j, i, j+2, i, j+1, i, j+3);
-																					ab = ab == Double.NEGATIVE_INFINITY ? ab: -ab;
-																					currValue = valutaMossa(scacFuturaClass, side2, depth-1, ab);
+																					
+																					currValue = valutaMossa(scacFuturaClass, side2, depth-1, ab == Double.NEGATIVE_INFINITY ? ab: -ab);
 																					if(currValue < bestValue){
 																						bestValue = currValue;
 																						mossa = m;
@@ -800,11 +888,13 @@ public class Client {
 																					if (alfabeta > bestValue)
 																						break aleg;
 																					ab = bestValue;
-																				}else if(scacFutura[i][j+5] == 0){
+																				}else if(scac[i][j+5] == 0){
+																					scacFuturaClass = scacchiera2.clona();
+																					scacFutura = scacFuturaClass.getScacchiera();
 																					scacFuturaClass.aggiornaScacchiera(i, j, i, j+2, i, j+1, i, j+3);// da controllare, la pedina avversaria non viene toccata
 																					m = generaStringaMossa(i, j, i, j+2, i, j+1, i, j+3);
-																					ab = ab == Double.NEGATIVE_INFINITY ? ab: -ab;
-																					currValue = valutaMossa(scacFuturaClass, side2, depth-1, ab);
+																					
+																					currValue = valutaMossa(scacFuturaClass, side2, depth-1, ab == Double.NEGATIVE_INFINITY ? ab: -ab);
 																					if(currValue < bestValue){
 																						bestValue = currValue;
 																						mossa = m;
@@ -814,11 +904,13 @@ public class Client {
 																					ab = bestValue;
 																				}
 																		}
-																	}else if(scacFutura[i][j+3] == s2 && scacFutura[i][j+4] == 0){
+																	}else if(scac[i][j+3] == s2 && scac[i][j+4] == 0){
+																		scacFuturaClass = scacchiera2.clona();
+																		scacFutura = scacFuturaClass.getScacchiera();
 																		scacFuturaClass.aggiornaScacchiera(i, j, i, j+2, i, j+1, i, j+3);// da controllare
 																		m = generaStringaMossa(i, j, i, j+2, i, j+1, i, j+3);
-																		ab = ab == Double.NEGATIVE_INFINITY ? ab: -ab;
-																		currValue = valutaMossa(scacFuturaClass, side2, depth-1, ab);
+																		
+																		currValue = valutaMossa(scacFuturaClass, side2, depth-1, ab == Double.NEGATIVE_INFINITY ? ab: -ab);
 																		if(currValue < bestValue){
 																			bestValue = currValue;
 																			mossa = m;
@@ -893,6 +985,7 @@ public class Client {
 		int k = corrispondenza(vm[2]);//indice posizione di partenza dell'ultima pedina del gruppo
 		int j = corrispondenza(vm[4]);//indice posizione di arrivo della prima pedina del gruppo
 		int l = corrispondenza(vm[6]);//indice posizione di arrivo dell'ultima pedina del gruppo
+		//System.out.println("STRINGA " + i + ""+ vm[1] + "" + k + "" + vm[3] + "" + j + "" + vm[5] + "" + l + "" + vm[7]);
 		scacchiera.aggiornaScacchiera(i,Character.getNumericValue(vm[1]),k,Character.getNumericValue(vm[3]),j,Character.getNumericValue(vm[5]),l,Character.getNumericValue(vm[7]));
 	}
 
@@ -965,10 +1058,10 @@ public class Client {
 //		String serverAddress = (args.length == 0) ? "localhost" : args[0];
 //		int serverPort = (args.length == 0) ? 8901 : Integer.parseInt(args[1]);
 //		Client client = new Client(serverAddress, serverPort);
+		
 //		client.play();
 		in1 = new BufferedReader(new InputStreamReader(System.in));
 		long startTime, endTime;
-		double v;
 		String mossa;
 		scacchiera = new Scacchiera();
 		stampa(scacchiera.getScacchiera());
@@ -979,18 +1072,20 @@ public class Client {
 			startTime = System.nanoTime();
 			convertiStringaMossa(mossa);
 			stampa(scacchiera.getScacchiera());
-			endTime = System.nanoTime();
+			//endTime = System.nanoTime();
 			System.out.println("\nPedine nere mangiate:    " + scacchiera.getNereCatturate());
 			System.out.println("Pedine bianche mangiate: " + scacchiera.getBiancheCatturate() + "\n");
-			System.out.println("Ho finito in : " + (endTime-startTime) + " ns." );
-			startTime = System.nanoTime();
+			//System.out.println("Ho finito in : " + (endTime-startTime) + " ns." );
+			//startTime = System.nanoTime();
 			System.out.println("Mo ce pens.... \n");
-			Client.generaProssimaMossa(scacchiera, "bianco", 4);
+			Client.generaProssimaMossa(scacchiera, "bianco", 3);
 			convertiStringaMossa(mossaFinale);
 			stampa(scacchiera.getScacchiera());
 			endTime = System.nanoTime();
 			System.out.println("La mossa generata è: " + mossaFinale + "\n");
-			System.out.println("Ho finito in di elaborarela mossa in: " + (endTime-startTime) + " ns." );
+			System.out.println("\nPedine nere mangiate:    " + scacchiera.getNereCatturate());
+			System.out.println("Pedine bianche mangiate: " + scacchiera.getBiancheCatturate() + "\n");
+			System.out.println("Ho finito di elaborare la mossa in: " + (endTime-startTime) + " ns." );
 		}
 	}
 }

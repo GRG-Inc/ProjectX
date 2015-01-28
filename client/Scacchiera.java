@@ -65,6 +65,7 @@ public class Scacchiera {
 				numeroPedine = Math.abs(origP2 - origU2) + 1; //RIGA PEZZ'I MMERDA(POTREBBE GENERARE ERRORE!!!!!!!!!!)
 			else
 				numeroPedine = Math.abs(origP1-origU1) + 1;
+			//System.out.println("numero di pedine: " + numeroPedine);
 			byte side1 = getSide(origP1, origP2);
 			if(numeroPedine == 1){
 				scacchiera[destP1][destP2] = side1;
