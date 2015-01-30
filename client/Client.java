@@ -6,14 +6,14 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.Scanner;
 
-public class Client //implements Runnable 
+public class Client implements Runnable 
 {
 	
 	private Socket socket;
 	
 	private static BufferedReader in,in1;
 	private static PrintWriter out;
-	private String colour;
+	//private String colour;
 	private AI ai;
 	public Client(String serverAddress, int port) throws Exception {
 		// Setup networking
@@ -61,6 +61,7 @@ public class Client //implements Runnable
 					else
 						move = "i8i9i7i8";*/
 					out.println("MOVE "+move);
+					ai.convertiStringaMossa(move);
 				} else if (response.startsWith("TIMEOUT")) {
 					System.out.println("Time out");
 				} else if (response.startsWith("MESSAGE")) {
@@ -74,14 +75,14 @@ public class Client //implements Runnable
 		}
 	}
 	
-	/*public void run(){
+	public void run(){
 		try {
 			play();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-	}*/
+	}
 	
 	
 	/**
@@ -93,9 +94,9 @@ public class Client //implements Runnable
 		int serverPort = (args.length == 0) ? 8901 : Integer.parseInt(args[1]);
 		Client client = new Client(serverAddress, serverPort);
 		
-		//new Thread(client).start();
+		new Thread(client).start();
 		
-		client.play();
+		//client.play();
 		
 //		in1 = new BufferedReader(new InputStreamReader(System.in));
 //		long startTime, endTime;

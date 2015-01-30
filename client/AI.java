@@ -4,7 +4,7 @@ import java.util.HashMap;
 
 public class AI {
 	
-	public int numMosse;
+	//private int numMosse;
 	private  String mossaFinale;
 	private final byte[] CostiCattura = { 0, 8, 12, 16, 24, 36, 100 };
 	private final int[] minColumn = { 1, 1, 1, 1, 1, 1, 2, 3, 4, 5}; //da che colonna inizia la scacchiera per ogni riga compresa cornice
@@ -12,17 +12,17 @@ public class AI {
 	private byte[] direzioni = {1,2,3,4,5,6};//N,NO,O,S,SE,E
 	private HashMap<Integer, Integer> distance = new HashMap<Integer, Integer>();
 	private Integer dist;
-	private final byte bianco=2, nero=3;
+	private static final byte white=2, black=3;
 	private Scacchiera scacchiera;
 
 	public AI(){
 		scacchiera = new Scacchiera();
-		numMosse = 0;
+		//numMosse = 0;
 	}
 	
-	public int getNumMosse() {
+	/*public int getNumMosse() {
 		return numMosse;
-	}
+	}*/
 
 	public Scacchiera getScacchiera() {
 		return scacchiera;
@@ -47,24 +47,24 @@ public class AI {
 	}
 
 	private double valutaMossa(Scacchiera scacchiera2, String side1, int depth, double alfabeta) {
-		numMosse++;
+		//numMosse++;
 		byte[][] scacc= scacchiera2.getScacchiera();
 		byte s1, s2;
 		String side2;
-		if(side1.equalsIgnoreCase("bianco")){
-			s1 = bianco;
-			s2 = nero;
-			side2 = "nero";
+		if(side1.equalsIgnoreCase("white")){
+			s1 = white;
+			s2 = black;
+			side2 = "black";
 		}
-		else{
-			s1 = nero;
-			s2 = bianco;
-			side2 = "bianco";
+		else {
+			s1 = black;
+			s2 = white;
+			side2 = "white";
 		}
 			
 		if(depth == 0){
 			//assegna valore a configurazione corrente
-			double w1 = 1,w2 = 1,w3 = 1,w4 = 2; //pesi
+			double w1 = 1,w2 = 1,w3 = 1,w4 = 1.5; //pesi
 			double centerDist = 0, coesione = 0, premioCatt = 0, penaleCatt = 0;
 			if(s1==2){
 				//FIXME // mangia 7 pedine bianche e da errore
