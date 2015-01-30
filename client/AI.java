@@ -64,7 +64,7 @@ public class AI {
 			
 		if(depth == 0){
 			//assegna valore a configurazione corrente
-			double w1 = 1,w2 = 1,w3 = 1; //pesi
+			double w1 = 1,w2 = 1,w3 = 1,w4 = 2; //pesi
 			double centerDist = 0, coesione = 0, premioCatt = 0, penaleCatt = 0;
 			if(s1==2){
 				//FIXME // mangia 7 pedine bianche e da errore
@@ -84,7 +84,7 @@ public class AI {
 						coesione -= calcolaCoesione(scacc,i,j);
 					}
 				}
-			return w1*centerDist + w2*coesione + w3*premioCatt - 5*penaleCatt;
+			return w1*centerDist + w2*coesione + w3*premioCatt - w4*penaleCatt;
 		}else{
 			//genera configurazione futura
 			double bestValue = Double.POSITIVE_INFINITY, currValue, ab = alfabeta;
