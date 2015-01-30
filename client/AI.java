@@ -112,7 +112,7 @@ public class AI {
 											ab = bestValue;
 										}else if(scac[i-1][j] == s1){// due pedine allineate
 												if(scacchiera2.esisteCella(i-2, j)){
-													if(scac[i-2][j] == 1){// la cella controllata è vuota quindi mi sposto li
+													if(scac[i-2][j] == 1){// la cella controllata e' vuota quindi mi sposto li
 														scacFuturaClass = scacchiera2.clona();
 														scacFutura = scacFuturaClass.getScacchiera();
 														scacFuturaClass.aggiornaScacchiera(i-1, j, i, j, i-2, j, i-1, j);//indici invertiti per avere indici mossa ordinati correttaete per tutto il caso NORD
@@ -153,7 +153,7 @@ public class AI {
 																	if (alfabeta > bestValue)
 																		break aleg;
 																	ab = bestValue;
-																}else if(scac[i-3][j] == s2 && scacchiera2.esisteCella(i-4, j)){//c'è avversario
+																}else if(scac[i-3][j] == s2 && scacchiera2.esisteCella(i-4, j)){//c'e' avversario
 																		if(scac[i-4][j] == 1){
 																			scacFuturaClass = scacchiera2.clona();
 																			scacFutura = scacFuturaClass.getScacchiera();
@@ -233,7 +233,7 @@ public class AI {
 											ab = bestValue;
 										}else if(scac[i-1][j-1] == s1){// due pedine allineate
 												if(scacchiera2.esisteCella(i-2, j-2)){
-													if(scac[i-2][j-2] == 1){// la cella controllata è vuota
+													if(scac[i-2][j-2] == 1){// la cella controllata e' vuota
 														scacFuturaClass = scacchiera2.clona();
 														scacFutura = scacFuturaClass.getScacchiera();
 														scacFuturaClass.aggiornaScacchiera(i-1, j-1, i, j, i-2, j-2, i-1, j-1); //indici NO inertiti per lo stesso motivo del NORD
@@ -274,7 +274,7 @@ public class AI {
 																	if (alfabeta > bestValue)
 																		break aleg;
 																	ab = bestValue;
-																}else if(scac[i-3][j-3] == s2 && scacchiera2.esisteCella(i-4, j-4)){//c'è avversario
+																}else if(scac[i-3][j-3] == s2 && scacchiera2.esisteCella(i-4, j-4)){//c'e' avversario
 																		if(scac[i-4][j-4] == 1){
 																			scacFuturaClass = scacchiera2.clona();
 																			scacFutura = scacFuturaClass.getScacchiera();
@@ -355,7 +355,7 @@ public class AI {
 											ab = bestValue;
 										}else if(scac[i][j-1] == s1){// due pedine allineate
 												if(scacchiera2.esisteCella(i, j-2)){
-													if(scac[i][j-2] == 1){// la cella controllata è vuota
+													if(scac[i][j-2] == 1){// la cella controllata e' vuota
 														scacFuturaClass = scacchiera2.clona();
 														scacFutura = scacFuturaClass.getScacchiera();
 														scacFuturaClass.aggiornaScacchiera(i, j-1, i, j, i, j-2, i, j-1);
@@ -396,7 +396,7 @@ public class AI {
 																	if (alfabeta > bestValue)
 																		break aleg;
 																	ab = bestValue;
-																}else if(scac[i][j-3] == s2 && scacchiera2.esisteCella(i, j-4)){//c'è avversario
+																}else if(scac[i][j-3] == s2 && scacchiera2.esisteCella(i, j-4)){//c'e' avversario
 																		if(scac[i][j-4] == 1){
 																			scacFuturaClass = scacchiera2.clona();
 																			scacFutura = scacFuturaClass.getScacchiera();
@@ -477,7 +477,7 @@ public class AI {
 											ab = bestValue;
 										}else if(scac[i+1][j] == s1){// due pedine allineate
 												if(scacchiera2.esisteCella(i+2, j)){
-													if(scac[i+2][j] == 1){// la cella controllata è vuota quindi mi sposto li
+													if(scac[i+2][j] == 1){// la cella controllata e' vuota quindi mi sposto li
 														scacFuturaClass = scacchiera2.clona();
 														scacFutura = scacFuturaClass.getScacchiera();
 														scacFuturaClass.aggiornaScacchiera(i, j, i+1, j, i+1, j, i+2, j);// da controllare
@@ -518,7 +518,7 @@ public class AI {
 																	if (alfabeta > bestValue)
 																		break aleg;
 																	ab = bestValue;
-																}else if(scac[i+3][j] == s2 && scacchiera2.esisteCella(i+4, j)){//c'è avversario
+																}else if(scac[i+3][j] == s2 && scacchiera2.esisteCella(i+4, j)){//c'e' avversario
 																		if(scac[i+4][j] == 1){
 																			scacFuturaClass = scacchiera2.clona();
 																			scacFutura = scacFuturaClass.getScacchiera();
@@ -600,7 +600,7 @@ public class AI {
 												if(scacchiera2.esisteCella(i+2, j+2)){
 													scacFuturaClass = scacchiera2.clona();
 													scacFutura = scacFuturaClass.getScacchiera();
-													if(scac[i+2][j+2] == 1){// la cella controllata è vuota quindi mi sposto li
+													if(scac[i+2][j+2] == 1){// la cella controllata e' vuota quindi mi sposto li'
 														scacFuturaClass.aggiornaScacchiera(i, j, i+1, j+1, i+1, j+1, i+2, j+2);// da controllare
 														m = generaStringaMossa(i, j, i+1, j+1, i+1, j+1, i+2, j+2);
 														currValue = valutaMossa(scacFuturaClass, side2, depth-1, ab == Double.NEGATIVE_INFINITY ? ab: -ab);
@@ -639,7 +639,7 @@ public class AI {
 																	if (alfabeta > bestValue)
 																		break aleg;
 																	ab = bestValue;
-																}else if(scac[i+3][j+3] == s2 && scacchiera2.esisteCella(i+4, j+4)){//c'è avversario
+																}else if(scac[i+3][j+3] == s2 && scacchiera2.esisteCella(i+4, j+4)){//c'e' avversario
 																		if(scacFutura[i+4][j+4] == 1){
 																			scacFuturaClass = scacchiera2.clona();
 																			scacFutura = scacFuturaClass.getScacchiera();
@@ -719,7 +719,7 @@ public class AI {
 											ab = bestValue;
 										}else if(scac[i][j+1] == s1){// due pedine allineate
 												if(scacchiera2.esisteCella(i, j+2)){
-													if(scac[i][j+2] == 1){// la cella controllata è vuota quindi mi sposto li
+													if(scac[i][j+2] == 1){// la cella controllata e' vuota quindi mi sposto li'
 														scacFuturaClass = scacchiera2.clona();
 														scacFutura = scacFuturaClass.getScacchiera();
 														scacFuturaClass.aggiornaScacchiera(i, j, i, j+1, i, j+1, i, j+2);// da controllare
@@ -760,7 +760,7 @@ public class AI {
 																	if (alfabeta > bestValue)
 																		break aleg;
 																	ab = bestValue;
-																}else if(scac[i][j+3] == s2 && scacchiera2.esisteCella(i, j+4)){//c'è avversario
+																}else if(scac[i][j+3] == s2 && scacchiera2.esisteCella(i, j+4)){//c'e' avversario
 																		if(scac[i][j+4] == 1){
 																			scacFuturaClass = scacchiera2.clona();
 																			scacFutura = scacFuturaClass.getScacchiera();
