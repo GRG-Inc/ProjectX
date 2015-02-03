@@ -54,7 +54,7 @@ public class Client implements Runnable
 				} else if (response.startsWith("YOUR_TURN")) {
 					System.out.print("["+ System.currentTimeMillis()+"] ");
 					System.out.println("Your move: ");
-					String move = ai.generaProssimaMossa(ai.getScacchiera(), colour, 3);// sc.next();
+					String move = ai.generaProssimaMossa(ai.getScacchiera(), colour, 2);// sc.next();
 					//Thread.sleep(190);
 				/*	if(colour.equals("Black"))
 						move = "a4a5a3a4";
@@ -62,6 +62,8 @@ public class Client implements Runnable
 						move = "i8i9i7i8";*/
 					out.println("MOVE "+move);
 					ai.convertiStringaMossa(move);
+					System.out.println(move);
+					Scacchiera.stampa(ai.getScacchiera().getScacchiera());
 				} else if (response.startsWith("TIMEOUT")) {
 					System.out.println("Time out");
 				} else if (response.startsWith("MESSAGE")) {

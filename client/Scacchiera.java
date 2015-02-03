@@ -54,7 +54,17 @@ public class Scacchiera {
 		return (riga >= 1 && riga <= 9 && colonna >= minColumn[riga] && colonna<= maxColumn[riga]);
 	}
 
-	
+	/**
+	 * 
+	 * @param origP1 Indice di riga prima pedina partenza
+	 * @param origP2 Indice di colonna prima pedina partenza 
+	 * @param origU1 Indice di riga ultima pedina partenza 
+	 * @param origU2 Indice di colonna ultima pedina partenza
+	 * @param destP1 Indice di riga prima pedina arrivo
+	 * @param destP2 Indice di colonna prima pedina arrivo
+	 * @param destU1 Indice di riga ultima pedina arrivo
+	 * @param destU2 Indice di colonna ultima pedina arrivo
+	 */
 	
 	public void aggiornaScacchiera(int origP1, int origP2, int origU1, int origU2, int destP1, int destP2, int destU1, int destU2){
 			
@@ -62,7 +72,7 @@ public class Scacchiera {
 			boolean dir1, dir2; //dir1 false=destra true=sinistra, dir2 false=alto true=basso
 			
 			if(origP2 - origU2!=0)
-				numeroPedine = Math.abs(origP2 - origU2) + 1; //RIGA PEZZ'I MMERDA(POTREBBE GENERARE ERRORE!!!!!!!!!!)
+				numeroPedine = Math.abs(origP2 - origU2) + 1; 
 			else
 				numeroPedine = Math.abs(origP1-origU1) + 1;
 			//System.out.println("numero di pedine: " + numeroPedine);
@@ -76,29 +86,29 @@ public class Scacchiera {
 				if(origP1 == origU1){//movimento sulla stessa riga
 					if((origP2 - destP2) < 0 ){//movimento verso destra
 						dir1=false;
-						if(scacchiera[origP1][destU2] == 1){//cella successiva vuota
-							scacchiera[origP1][destU2] = side1;
+						if(scacchiera[destU1][destU2] == 1){//cella successiva vuota
+							scacchiera[destU1][destU2] = side1;
 							scacchiera[origP1][origP2] = 1;
-						}else if(scacchiera[origP1][destU2 + 1] == 1){
+						}else if(scacchiera[destU1][destU2 + 1] == 1){
 							spostaRiga(dir1,origP1,origP2, destU1, destU2);
-						}else if(scacchiera[origP1][destU2 + 1] == 0){
+						}else if(scacchiera[destU1][destU2 + 1] == 0){
 							attacca(origP1,origP2, destU1, destU2);
-						}else if(scacchiera[origP1][destU2 + 2] == 1){
+						}else if(scacchiera[destU1][destU2 + 2] == 1){
 							spostaRiga2(dir1,origP1,origP2, destU1, destU2);
-						}else if(scacchiera[origP1][destU2 + 2] == 0)
+						}else if(scacchiera[destU1][destU2 + 2] == 0)
 							attacca(origP1,origP2, destU1, destU2);
 					}else {//movimento verso sinistra
 						dir1=true;
-						if(scacchiera[origP1][destP2] == 1){//cella successiva vuota
-							scacchiera[origP1][origU2] = 1;
-							scacchiera[origP1][destP2] = side1;
-						}else if(scacchiera[origP1][destP2 - 1] == 1){
+						if(scacchiera[destP1][destP2] == 1){//cella successiva vuota
+							scacchiera[origU1][origU2] = 1;
+							scacchiera[destP1][destP2] = side1;
+						}else if(scacchiera[destP1][destP2 - 1] == 1){
 							spostaRiga(dir1,origU1,origU2,destP1,destP2);
-						}else if(scacchiera[origP1][destP2 - 1] == 0){
+						}else if(scacchiera[destP1][destP2 - 1] == 0){
 							attacca(origU1,origU2,destP1,destP2);
-						}else if(scacchiera[origP1][destP2 - 2] == 1){
+						}else if(scacchiera[destP1][destP2 - 2] == 1){
 							spostaRiga2(dir1,origU1,origU2,destP1,destP2);
-						}else if(scacchiera[origP1][destP2 - 2] == 0){
+						}else if(scacchiera[destP1][destP2 - 2] == 0){
 							attacca(origU1,origU2,destP1,destP2);
 						}						
 					}
@@ -112,7 +122,7 @@ public class Scacchiera {
 					if(origP1 > destP1 ){//movimento verso l'alto 
 						dir2=false;
 						if(scacchiera[destP1][destP2] == 1){
-							scacchiera[origU1][destP2] = 1;
+							scacchiera[origU1][origU2] = 1;
 							scacchiera[destP1][destP2] = side1;
 						}else if(scacchiera[destP1-1][destP2] == 1){
 							spostaColonna(dir2,origU1,origU2,destP1,destP2);
@@ -125,16 +135,16 @@ public class Scacchiera {
 						}
 					}else{//movimento verso il basso
 						dir2=true;
-						if(scacchiera[destU1][origP2] == 1){
+						if(scacchiera[destU1][destU2] == 1){
 							scacchiera[origP1][origP2] = 1;
-							scacchiera[destU1][origP2] = side1;
-						}else if(scacchiera[destU1+1][origP2] == 1){
+							scacchiera[destU1][destU2] = side1;
+						}else if(scacchiera[destU1+1][destU2] == 1){
 							spostaColonna(dir2, origP1, origP2, destU1, destU2);
-						}else if(scacchiera[destU1+1][origP2] == 0){
+						}else if(scacchiera[destU1+1][destU2] == 0){
 							attacca(origP1, origP2,destU1,destU2);
-						}else if(scacchiera[destU1+2][origP2] == 1){
+						}else if(scacchiera[destU1+2][destU2] == 1){
 							spostaColonna2(dir2, origP1, origP2, destU1, destU2);
-						}else if(scacchiera[destU1+2][origP2] == 0){
+						}else if(scacchiera[destU1+2][destU2] == 0){
 							attacca(origP1,origP2,destU1,destU2);
 						}
 					}
@@ -174,11 +184,11 @@ public class Scacchiera {
 						scacchiera[destP1][destP2] = side1;
 					}else if(scacchiera[destP1-1][destP2 - 1] == 1){
 						spostaNO(origU1,origU2,destP1,destP2);
-					}else if(scacchiera[destP1-1][destP2 - 1] == 0){
+					}else if(scacchiera[destP1-1][destP2-1] == 0){
 						attacca(origU1,origU2,destP1,destP2);
-					}else if(scacchiera[destP1-1][destP2 - 1] == 1){
+					}else if(scacchiera[destP1-2][destP2-2] == 1){
 						spostaNO2(origU1,origU2,destP1,destP2);
-					}else if(scacchiera[destP1-1][destP2 - 1] == 0){
+					}else if(scacchiera[destP1-2][destP2-2] == 0){
 						attacca(origU1,origU2,destP1,destP2);
 						}
 					}
@@ -317,7 +327,7 @@ public class Scacchiera {
 		return (scacchiera[i][numericValue] == 2)? bianco: nero;
 	}
 	
-	public void stampa(byte[][] s){
+	public static void stampa(byte[][] s){
 		String x = " ABCDEFGHI ";
 		System.out.println("    1 2 3 4 5 6 7 8 9  ");
 		for(int i=0; i<s.length; i++){

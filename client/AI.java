@@ -6,7 +6,7 @@ public class AI {
 	
 	//private int numMosse;
 	private  String mossaFinale;
-	private final byte[] CostiCattura = { 0, 8, 12, 16, 24, 36, 100 };
+	private final byte[] CostiCattura = { 0, 8, 12, 16, 24, 36, 100, 100, 100, 100, 100, 100, 100, 100 };
 	private final int[] minColumn = { 1, 1, 1, 1, 1, 1, 2, 3, 4, 5}; //da che colonna inizia la scacchiera per ogni riga compresa cornice
 	private final int[] maxColumn = { 5, 5, 6, 7, 8, 9, 9, 9, 9, 9}; //a che colonna finisce la scacchiera per ogni riga compresa cornice
 	private byte[] direzioni = {1,2,3,4,5,6};//N,NO,O,S,SE,E
@@ -64,7 +64,7 @@ public class AI {
 			
 		if(depth == 0){
 			//assegna valore a configurazione corrente
-			double w1 = 1,w2 = 1,w3 = 1,w4 = 1.5; //pesi
+			double w1 = 1,w2 = 1,w3 = 1,w4 = 2; //pesi
 			double centerDist = 0, coesione = 0, premioCatt = 0, penaleCatt = 0;
 			if(s1==2){
 				//FIXME // mangia 7 pedine bianche e da errore
@@ -77,11 +77,11 @@ public class AI {
 			for(int i = 1; i<10; i++)
 				for(int j = minColumn[i]; j <= maxColumn[i]; j++){
 					if(scacc[i][j] == s1){
-						centerDist += 1/((int)distance.get(i*1000+j*100+5*10+5) + 1);
+						centerDist += 1.5/((int)distance.get(i*1000+j*100+5*10+5) + 1);
 						coesione += calcolaCoesione(scacc,i,j);
 					}else if(scacc[i][j] == s2){
 						centerDist -= 5/((int)distance.get(i*1000+j*100+5*10+5) + 1);
-						coesione -= calcolaCoesione(scacc,i,j);
+						coesione -= 1.5*calcolaCoesione(scacc,i,j);
 					}
 				}
 			return w1*centerDist + w2*coesione + w3*premioCatt - w4*penaleCatt;
